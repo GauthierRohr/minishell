@@ -1,0 +1,14 @@
+.Xauthority
+.bash_history
+.cache/
+.config/
+.docker/
+.git/
+.local/
+.vscode/
+*.tar.gz
+*.o
+*.out
+*.a
+*.dSYM/
+.DS_Store
