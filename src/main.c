@@ -5,40 +5,58 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 
+// Fonction principale de minishell
 int main(void)
 {
-    // Initialize history functionality
+    char    *user_input;
+
+    // Initialise la gestion de l'historique readline
     using_history();
-    char    *input;
+    user_input = NULL;
 
-    while (input != NULL)
+    // Boucle principale du shell
+    while (1)
     {
-        input = readline("Minishell> ");
-        if (input == NULL)
-            break;
-        // Check if the user typed "exit"
-        if (strcmp(input, "exit") == 0)
+        user_input = readline("minishell> ");
+
+        // Si l'utilisateur appuie sur Ctrl+D (EOF)
+        if (user_input == NULL)
         {
-            free(input);
+            write(1, "exit\n", 5);
             break;
         }
-        // Add non-empty input to history
-        if (*input != '\0')
-            add_history(input);
-        free(input);
-    }
 
-    // Retrieve and print the history list
-    HIST_ENTRY **hist_list = history_list();
-    if (hist_list != NULL) {
-        printf("\nHistory List:\n");
-        for (int i = 0; hist_list[i] != NULL; i++)
+        // Ignore les lignes vides mais les ajoute pas à l'historique
+        if (user_input[0] == '\0')
         {
-            printf("%d: %s\n", i + history_base, hist_list[i]->line);
+            free(user_input);
+            continue;
         }
-    }
-    else
-        printf("No history available.\n");
 
-    return 0;
+        // Ajoute l'input à l'historique readline
+        add_history(user_input);
+
+        // ==== ✳️ TO_DO: GESTION DES BUILTINS ET COMMANDES ====
+        // ➤ Ici on doit parser l'input
+        // ➤ Vérifier si c’est un builtin (cd, echo, etc.)
+        // ➤ Sinon, lancer l'exec : execve avec fork
+        // ➤ Gérer les pipes/redirections plus tard ici ou avec redirect.c
+
+        if (strcmp(user_input, "exit") == 0)
+        {
+            free(user_input);
+            break;
+        }
+
+        // ➤ Pour l'instant, simple echo pour debug
+        printf("Commande reçue : %s\n", user_input);
+
+        free(user_input);
+    }
+
+    // ==== ✳️ TODO: LIBÉRATION MÉMOIRE STRUCTURES ====
+    // ➤ Quand vous avez des structures d'environnement, de commandes, etc.
+    // ➤ Pensez à tout free ici (liste, historique, etc.)
+
+    return (0);
 }
