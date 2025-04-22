@@ -5,13 +5,15 @@ CFLAGS = -Wall -Wextra -Werror
 INCLUDES = -I ./libft
 OBJ_DIR = obj
 
+# src/parser.c
 SRCS =	src/builtins.c \
 		src/env.c \
 		src/exec.c \
 		src/main.c \
-		src/parser.c \
 		src/redirect.c \
 		src/signals.c \
+		src/tokenizer.c \
+		src/tokenizer_utils.c \
 		src/utils.c
 
 OBJS = $(SRCS:src/%.c=$(OBJ_DIR)/%.o)

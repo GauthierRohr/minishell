@@ -2,12 +2,12 @@
 //
 // cd, echo, pwd, export, unset, env, exit.
 
-/* int	is_builtin()
+/* int		is_builtin(char *cmd)
 {
 
 }
 
-void	execute_builtin()
+int		execute_builtin(char **args, char ***env)
 {
 
 } */
