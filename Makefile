@@ -33,7 +33,6 @@ $(OBJ_DIR)/%.o: src/%.c
 clean:
 	rm -rf $(OBJ_DIR)
 	$(MAKE) -C ./libft clean
-	$(MAKE) -C ./minilibx clean
 
 fclean: clean
 	rm -f $(NAME)

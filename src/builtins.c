@@ -2,7 +2,7 @@
 //
 // cd, echo, pwd, export, unset, env, exit.
 
-int	is_builtin()
+/* int	is_builtin()
 {
 
 }
@@ -10,4 +10,4 @@ int	is_builtin()
 void	execute_builtin()
 {
 
-}
+} */
