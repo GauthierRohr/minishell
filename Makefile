@@ -9,6 +9,7 @@ OBJ_DIR = obj
 SRCS =	src/builtins.c \
 		src/env.c \
 		src/exec.c \
+		src/history.c \
 		src/main.c \
 		src/redirect.c \
 		src/signals.c \
