@@ -21,7 +21,6 @@ int main(void)
 {
 	char    	*user_input;
 	char		**args;
-	t_history	*history = NULL;
 
 	using_history();
 	user_input = NULL;
@@ -43,7 +42,6 @@ int main(void)
 			continue;
 		}
 		add_history(user_input);
-		add_to_history(&history, user_input); // A retirer plus tard
 
 		// ==== ✳️ GESTION DES BUILTINS ET COMMANDES ✳️ ====
 		// ➤ Parsing de l'input :
@@ -59,11 +57,9 @@ int main(void)
 			free(user_input);
 			break;
 		}
-		printf("\nCommande reçue : %s\n", user_input); // ➤ echo pour debug user_input
+		printf("\nCommande reçue : %s\n\n", user_input); // ➤ echo pour debug user_input
 
-		
 		free(user_input);
-		free_history(history);
 	}
 
 	// ==== ✳️ TODO: LIBÉRATION MÉMOIRE STRUCTURES ====
