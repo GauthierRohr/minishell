@@ -116,7 +116,9 @@ int	main(int argc, char **argv, char **envp)
 			free(user_input);
 			break;
 		}
-		// DEBUGGING : A RETIRER PLUS TARD
+		/////////////////////////////////////
+		// DEBUGGING : A RETIRER PLUS TARD //
+		/////////////////////////////////////
 		printf("%sExpected output:%s\n", GREEN, RST);
 		FILE *fp = popen(user_input, "r");
 		if (fp)
@@ -131,7 +133,9 @@ int	main(int argc, char **argv, char **envp)
 		printf("\n%s=== DEBUGGING ===%s\n", RED, RST);
 		printf("\n%sCommande reçue :%s %s\n\n", CYAN, RST, user_input); 
 		print_tab(args);
-		// FIN DEBUGGING
+		/////////////////////////////////////
+		//          FIN DEBUGGING		   //
+		/////////////////////////////////////
 		free(user_input);
 		free_tab(args); // free du tableau de tokens
 	}
