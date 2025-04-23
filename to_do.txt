@@ -1,0 +1,2 @@
+Check si environnement dupliqué fonctionne correctement.
+L'appliquer pour tous les builtins

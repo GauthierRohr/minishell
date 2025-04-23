@@ -1,3 +1,8 @@
+/!\
+start_git avant de coder
+push_git pour push
+merge_git pour merge
+
 GNU Readline library
 https://tiswww.case.edu/php/chet/readline/readline.html
 

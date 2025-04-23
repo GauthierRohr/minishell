@@ -6,7 +6,7 @@ int	is_builtin(const char *cmd);
 int	execute_builtin(char **args, char ***env);
 
 /* builtins_set1.c */
-int	builtin_echo(char **args);
+int	builtin_echo(char **args, char ***env);
 int	builtin_cd(char **args, char ***env);
 int	builtin_pwd(void);
 int	count_array(char **array);

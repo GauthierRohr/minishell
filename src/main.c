@@ -6,7 +6,7 @@
 /*   By: grohr <grohr@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/23 22:28:36 by grohr             #+#    #+#             */
-/*   Updated: 2025/04/23 22:36:31 by grohr            ###   ########.fr       */
+/*   Updated: 2025/04/23 23:28:12 by grohr            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,26 +16,6 @@
 #include <string.h>
 #include <readline/readline.h>
 #include <readline/history.h>
-
-char	**dup_env(char **envp)
-{
-	int		i = 0;
-	char	**env;
-
-	while (envp[i])
-		i++;
-	env = malloc(sizeof(char *) * (i + 1));
-	if (!env)
-		return (NULL);
-	i = 0;
-	while (envp[i])
-	{
-		env[i] = ft_strdup(envp[i]);
-		i++;
-	}
-	env[i] = NULL;
-	return (env);
-}
 
 void	free_env(char **env)
 {
@@ -90,10 +70,8 @@ int	main(int argc, char **argv, char **envp)
 	env = dup_env(envp);
 	if (!env)
 		return (1);
-
 	using_history();
 	user_input = NULL;
-
 	while (1)
 	{
 		user_input = readline("minishell> ");
@@ -115,7 +93,7 @@ int	main(int argc, char **argv, char **envp)
 		// ➤ Parsing de l'input :
 		args = tokenize_input(user_input, 0, 0, 0);
 		if (is_builtin(args[0]))
-			execute_builtin(args, &env); 	// on passera un vrai env plus tard
+			execute_builtin(args, &env);
 		else
 			execute_external(args, env); 	//si c'est pas un builtin, on execute
 

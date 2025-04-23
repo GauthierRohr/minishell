@@ -1,8 +1,6 @@
-# minishell
+# minishell - 42 school project : cloning a simple bash
 
-gcc -o minishell main.c -lreadline pour compiler
+			Actually working on minishell...
 
-/!\
-start_git avant de coder
-push_git pour push
-merge_git pour merge
+Gauthier Rohr			&&			Christopher Jauregui
+	grohr							  cjauregu

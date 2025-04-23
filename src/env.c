@@ -20,3 +20,25 @@
 //	•	Quand tu fais export LANG=fr_FR.UTF-8, tu dois pouvoir ajouter/modifier une variable.
 //	•	Quand tu fais unset PATH, tu dois la retirer de ta copie.
 //	•	Quand tu exécutes une commande avec execve(), tu dois lui passer ta propre copie de l’environnement (parce que tu l’as modifiée).
+
+#include "../inc/minishell.h"
+
+char	**dup_env(char **envp)
+{
+	int		i = 0;
+	char	**env;
+
+	while (envp[i])
+		i++;
+	env = malloc(sizeof(char *) * (i + 1));
+	if (!env)
+		return (NULL);
+	i = 0;
+	while (envp[i])
+	{
+		env[i] = ft_strdup(envp[i]);
+		i++;
+	}
+	env[i] = NULL;
+	return (env);
+}

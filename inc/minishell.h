@@ -6,7 +6,7 @@
 /*   By: grohr <grohr@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/23 22:28:10 by grohr             #+#    #+#             */
-/*   Updated: 2025/04/23 22:28:16 by grohr            ###   ########.fr       */
+/*   Updated: 2025/04/23 23:27:31 by grohr            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,9 +14,10 @@
 # define MINISHELL_H
 
 # include "../libft/libft.h"
-# include "tokenizer.h"
 # include "builtins.h"
+# include "env.h"
 # include "exec.h"
+# include "tokenizer.h"
 
 #define RED     "\033[1;31m"
 #define GREEN   "\033[1;32m"

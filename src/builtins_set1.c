@@ -6,17 +6,81 @@
 /*   By: grohr <grohr@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/23 22:28:08 by grohr             #+#    #+#             */
-/*   Updated: 2025/04/23 22:33:45 by grohr            ###   ########.fr       */
+/*   Updated: 2025/04/23 23:40:09 by grohr            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../inc/minishell.h"
 
+#include <string.h>
+
+// Pour prendre en compte les echo $PWD ou autres commandes
+
+char	*get_env_value(const char *name, char **env)
+{
+	int		i;
+	size_t	len;
+
+	if (!name || !env)
+		return (NULL);
+	len = ft_strlen(name);
+	i = 0;
+	while (env[i])
+	{
+		if (ft_strncmp(env[i], name, len) == 0 && env[i][len] == '=')
+			return (env[i] + len + 1); // retourne juste la valeur
+		i++;
+	}
+	return (NULL);
+}
+
+char	*expand_vars(const char *token, char **env)
+{
+	char	*expanded;
+	const char	*dollar;
+	char	var_name[256];
+	char	*value;
+	int		i = 0;
+
+	dollar = ft_strchr(token, '$');
+	if (!dollar)
+		return (ft_strdup(token));
+
+	expanded = malloc(ft_strlen(token) + 256); // assez large pour contenir la valeur
+	if (!expanded)
+		return (NULL);
+
+	while (token[i] && token[i] != '$')
+	{
+		expanded[i] = token[i];
+		i++;
+	}
+	expanded[i] = '\0';
+
+	int j = 0;
+	i++; // skip le $
+	while (token[i] && (ft_isalnum(token[i]) || token[i] == '_'))
+		var_name[j++] = token[i++];
+	var_name[j] = '\0';
+
+	value = get_env_value(var_name, env);
+	if (value)
+		strcat(expanded, value);
+	else
+		strcat(expanded, "");
+
+	if (token[i])
+		strcat(expanded, &token[i]);
+
+	return (expanded);
+}
+
+
 // Gère la commande echo avec option -n
 // 
-// @return 0 en cas de succès
-// 
-int	builtin_echo(char **args)
+// return 0 en cas de succès
+//
+int	builtin_echo(char **args, char ***env)
 {
 	int	i;
 	int	n_option;
@@ -31,7 +95,9 @@ int	builtin_echo(char **args)
 	}
 	while (args[i])
 	{
-		clean_arg = remove_quotes(args[i]);
+		char *tmp = expand_vars(args[i], *env); 	// remplace les $VAR
+		clean_arg = remove_quotes(tmp);
+		free(tmp);								
 		printf("%s", clean_arg);
 		free(clean_arg);
 		

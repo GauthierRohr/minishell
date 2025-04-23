@@ -1,6 +1,6 @@
 NAME = minishell
 
-CC = cc
+CC = gcc
 CFLAGS = -Wall -Wextra -Werror
 INCLUDES = -I ./libft -I ./inc
 OBJ_DIR = obj
