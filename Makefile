@@ -2,10 +2,13 @@ NAME = minishell
 
 CC = cc
 CFLAGS = -Wall -Wextra -Werror
-INCLUDES = -I ./libft
+INCLUDES = -I ./libft -I ./inc
 OBJ_DIR = obj
 
-# src/parser.c
+# Libraries
+LIBFT = ./libft/libft.a
+
+# Sources
 SRCS =	src/builtins_main.c \
 		src/builtins_set1.c \
 		src/builtins_set2.c \
@@ -20,20 +23,23 @@ SRCS =	src/builtins_main.c \
 
 OBJS = $(SRCS:src/%.c=$(OBJ_DIR)/%.o)
 
-# Libraries
-LIBFT = ./libft/libft.a
+
+
+# Règles principales
+all: $(NAME)
+
+# Compilation des objets
+$(OBJ_DIR)/%.o: src/%.c
+	@mkdir -p $(OBJ_DIR)
+	@$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
+
+$(LIBFT):
+	@$(MAKE) -C ./libft
 
 $(NAME): $(OBJS) $(LIBFT)
 	$(CC) $(CFLAGS) $(OBJS) $(LIBFT) -lreadline -o $(NAME)
 
-$(LIBFT):
-	$(MAKE) -C ./libft
-
-# créer les fichiers objets dans le répertoire obj
-$(OBJ_DIR)/%.o: src/%.c
-	@mkdir -p $(OBJ_DIR)
-	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
-
+# Nettoyage
 clean:
 	rm -rf $(OBJ_DIR)
 	$(MAKE) -C ./libft clean
@@ -44,8 +50,6 @@ fclean: clean
 
 re: fclean all
 
-.PHONY: all clean fclean re
-
 # ---------------------------------------------------
 # Autisme 2.0
 RED=\033[0;31m
@@ -54,7 +58,7 @@ YELLOW=\033[0;33m
 BLUE=\033[0;34m
 PURPLE=\033[0;35m
 CYAN=\033[0;36m
-NC=\033[0m # (No Color)
+NC=\033[0m # No Color
 
 flex:
 	@echo "🎉 Flexing those muscles! 📸"
@@ -82,3 +86,5 @@ seum:
 	@sleep 0.5
 	@echo "\n ${YELLOW}   ᶠᶸᶜᵏᵧₒᵤ!${NC}\n"
 	@sleep 0.5
+
+.PHONY: all clean fclean re flex seum

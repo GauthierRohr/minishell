@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   builtins_set1.c                                    :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: grohr <grohr@student.42.fr>                +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/04/23 22:28:08 by grohr             #+#    #+#             */
+/*   Updated: 2025/04/23 22:33:45 by grohr            ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "../inc/minishell.h"
 
 // Gère la commande echo avec option -n
@@ -8,17 +20,21 @@ int	builtin_echo(char **args)
 {
 	int	i;
 	int	n_option;
+	char *clean_arg;
 
 	n_option = 0;
 	i = 1;
-	if (args[1] && strcmp(args[1], "-n") == 0)
+	if (args[1] && ft_strcmp(args[1], "-n") == 0)
 	{
 		n_option = 1;
 		i = 2;
 	}
 	while (args[i])
 	{
-		printf("%s", args[i]);
+		clean_arg = remove_quotes(args[i]);
+		printf("%s", clean_arg);
+		free(clean_arg);
+		
 		if (args[i + 1])
 			printf(" ");
 		i++;
@@ -132,7 +148,7 @@ int	builtin_export(char **args, char ***env)
 			if (env_index != -1)
 			{
 				free((*env)[env_index]);
-				(*env)[env_index] = strdup(args[i]);
+				(*env)[env_index] = ft_strdup(args[i]);
 			}
 			else
 			{
@@ -143,7 +159,7 @@ int	builtin_export(char **args, char ***env)
 				env_size = -1;
 				while ((*env)[++env_size])
 					new_env[env_size] = (*env)[env_size];
-				new_env[env_size] = strdup(args[i]);
+				new_env[env_size] = ft_strdup(args[i]);
 				new_env[env_size + 1] = NULL;
 				free(*env);
 				*env = new_env;

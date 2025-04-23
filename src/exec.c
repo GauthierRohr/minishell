@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   exec.c                                             :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: grohr <grohr@student.42.fr>                +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/04/23 22:29:03 by grohr             #+#    #+#             */
+/*   Updated: 2025/04/23 22:31:03 by grohr            ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 // Exécution externe
 //
 // Fork + execve : pour lancer des binaires.
@@ -11,19 +23,30 @@
 #include <stdlib.h>
 #include <string.h>
 
-// Supprime les ' et " d'un token (in-place), pour afficher la bonne sortie dans le terminal
-static void	remove_quotes_inplace(char *str)
+// Supprime les ' et " d'un token, pour afficher la bonne sortie dans le terminal
+char	*remove_quotes(const char *str)
 {
-	int	i = 0;
-	int	j = 0;
+	int		i;
+	int		j;
+	char	*result;
 
+	if (!str)
+		return (NULL);
+	
+	result = malloc(ft_strlen(str) + 1);
+	if (!result)
+		return (NULL);
+	
+	i = 0;
+	j = 0;
 	while (str[i])
 	{
 		if (str[i] != '\"' && str[i] != '\'')
-			str[j++] = str[i];
+			result[j++] = str[i];
 		i++;
 	}
-	str[j] = '\0';
+	result[j] = '\0';
+	return (result);
 }
 
 // Exécute une commande externe via fork + execvp
@@ -44,7 +67,7 @@ int	execute_external(char **args, char **envp)
 		int i = 0;
 		while (args[i])
 		{
-			remove_quotes_inplace(args[i]); // Supprime quotes avant exec parce que j'avais
+			remove_quotes(args[i]); // Supprime quotes avant exec parce que j'avais
 			i++;							// laissé dans les tokens pour pas confondre l;exec de ' et "
 		}
 		if (execvp(args[0], args) == -1)

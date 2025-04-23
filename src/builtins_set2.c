@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   builtins_set2.c                                    :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: grohr <grohr@student.42.fr>                +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/04/23 22:28:19 by grohr             #+#    #+#             */
+/*   Updated: 2025/04/23 22:28:20 by grohr            ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "../inc/minishell.h"
 
 //Recherche une variable d'environnement
@@ -16,7 +28,7 @@ int	find_env_var(char **env, const char *var)
 	len = strlen(var);
 	while (env[i])
 	{
-		if (strncmp(env[i], var, len) == 0 && env[i][len] == '=')
+		if (ft_strncmp(env[i], var, len) == 0 && env[i][len] == '=')
 			return (i);
 		i++;
 	}
@@ -92,7 +104,7 @@ int	builtin_exit(char **args)
 	printf("exit\n");
 	if (!args[1])
 		exit(0);
-	exit_code = atoi(args[1]);
+	exit_code = ft_atoi(args[1]);
 	exit(exit_code);
 	return (0);
 }

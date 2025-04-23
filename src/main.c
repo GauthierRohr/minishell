@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   main.c                                             :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: grohr <grohr@student.42.fr>                +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/04/23 22:28:36 by grohr             #+#    #+#             */
+/*   Updated: 2025/04/23 22:36:31 by grohr            ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "../inc/minishell.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -18,7 +30,7 @@ char	**dup_env(char **envp)
 	i = 0;
 	while (envp[i])
 	{
-		env[i] = strdup(envp[i]);
+		env[i] = ft_strdup(envp[i]);
 		i++;
 	}
 	env[i] = NULL;
@@ -119,7 +131,7 @@ int	main(int argc, char **argv, char **envp)
 		/////////////////////////////////////
 		// DEBUGGING : A RETIRER PLUS TARD //
 		/////////////////////////////////////
-		printf("%sExpected output:%s\n", GREEN, RST);
+		printf("%sShell original:\n%s", GREEN, RST);
 		FILE *fp = popen(user_input, "r");
 		if (fp)
 		{
@@ -130,7 +142,9 @@ int	main(int argc, char **argv, char **envp)
 		    }
 		    pclose(fp);
 		}
-		printf("\n%s=== DEBUGGING ===%s\n", RED, RST);
+		printf("%s=================%s\n", RED, RST);
+		printf("%s=== DEBUGGING ===%s\n", RED, RST);
+		printf("%s=================%s\n", RED, RST);
 		printf("\n%sCommande reçue :%s %s\n\n", CYAN, RST, user_input); 
 		print_tab(args);
 		/////////////////////////////////////
