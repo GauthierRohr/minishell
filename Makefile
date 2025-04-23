@@ -43,3 +43,40 @@ fclean: clean
 re: fclean all
 
 .PHONY: all clean fclean re
+
+# ---------------------------------------------------
+# Autisme 2.0
+RED=\033[0;31m
+GREEN=\033[0;32m
+YELLOW=\033[0;33m
+BLUE=\033[0;34m
+PURPLE=\033[0;35m
+CYAN=\033[0;36m
+NC=\033[0m # (No Color)
+
+flex:
+	@echo "🎉 Flexing those muscles! 📸"
+	@sleep 0.5
+	@echo "\n    ${RED}✨ ᕙ(⇀‸↼‶)ᕗ ✨${NC}\n"
+	@sleep 0.5
+	@echo "\n    ${GREEN}   ᕙ(✧ڡ✧)ᕗ  ${NC}\n"
+	@sleep 0.5
+	@echo "\n    ${YELLOW}⚡️ ᕙ(^▽^)ᕗ ⚡️${NC}\n"
+	@sleep 0.5
+	@echo "\n    ${BLUE}   ᕦ(ò_óˇ)ᕤ  ${NC}\n"
+	@sleep 0.5
+	@echo "\n    ${PURPLE}💥 ᕙ(▀̿̿Ĺ̯̿̿▀̿ ̿)ᕗ 💥${NC}\n"
+	@sleep 0.5
+	@echo "\n🏆 Flex session complete! I'm a fcking boss"!
+
+seum:
+	@echo "\n ${RED}   ༼;´༎ຶ ۝ ༎ຶ༽ ${NC}\n"
+	@sleep 0.5
+	@echo "\n ${GREEN}   (˚ ˃̣̣̥⌓˂̣̣̥ ) ${NC}\n"
+	@sleep 0.5
+	@echo "\n ${CYAN}╭∩╮( •̀_•́ )╭∩╮${NC}\n"
+	@sleep 0.5
+	@echo "\n ${PURPLE}   (ﾉಥ益ಥ) ${NC}\n"
+	@sleep 0.5
+	@echo "\n ${YELLOW}   ᶠᶸᶜᵏᵧₒᵤ!${NC}\n"
+	@sleep 0.5
