@@ -2,4 +2,4 @@
 
 			Actually working on minishell...
 
-Gauthier Rohr (grohr)		&&		Christopher Jauregui (cjauregu)
+Gauthier Rohr (grohr)			&&			Christopher Jauregui (cjauregu)
