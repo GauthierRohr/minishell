@@ -6,7 +6,9 @@ INCLUDES = -I ./libft
 OBJ_DIR = obj
 
 # src/parser.c
-SRCS =	src/builtins.c \
+SRCS =	src/builtins_main.c \
+		src/builtins_set1.c \
+		src/builtins_set2.c \
 		src/env.c \
 		src/exec.c \
 		src/main.c \
