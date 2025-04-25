@@ -3,3 +3,6 @@
 			Actually working on minishell...
 
 Gauthier Rohr (grohr)			&&			Christopher Jauregui (cjauregu)
+--------------------------------------------------------------------------
+
+Tips :
