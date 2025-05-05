@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: grohr <grohr@student.42.fr>                +#+  +:+       +#+        */
+/*   By: cjauregu <cjauregu@student.42lausanne.c    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/23 22:28:10 by grohr             #+#    #+#             */
-/*   Updated: 2025/04/23 23:27:31 by grohr            ###   ########.fr       */
+/*   Updated: 2025/04/30 13:35:51 by cjauregu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@
 # include "env.h"
 # include "exec.h"
 # include "tokenizer.h"
+# include "signals.h"
 
 #define RED     "\033[1;31m"
 #define GREEN   "\033[1;32m"
@@ -39,6 +40,7 @@
 # include <sys/stat.h>
 # include <sys/wait.h>
 # include <sys/ioctl.h>
+# include <signal.h>
 # include <readline/readline.h>
 # include <readline/history.h>
 # include <curses.h>

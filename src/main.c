@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: grohr <grohr@student.42.fr>                +#+  +:+       +#+        */
+/*   By: cjauregu <cjauregu@student.42lausanne.c    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/23 22:28:36 by grohr             #+#    #+#             */
-/*   Updated: 2025/04/23 23:28:12 by grohr            ###   ########.fr       */
+/*   Updated: 2025/05/01 12:22:10 by cjauregu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,15 +72,13 @@ int	main(int argc, char **argv, char **envp)
 		return (1);
 	using_history();
 	user_input = NULL;
+	init_signals();
 	while (1)
 	{
 		user_input = readline("minishell> ");
 		// Si l'utilisateur appuie sur Ctrl+D (EOF)
 		if (user_input == NULL)
-		{
-			write(1, "exit\n", 5);
 			break;
-		}
 		// Ignore lignes vides + les ajoute pas à l'historique
 		if (user_input[0] == '\0')
 		{
@@ -100,16 +98,10 @@ int	main(int argc, char **argv, char **envp)
 		// ➤ Vérifier si c’est un builtin (cd, echo, pwd, export, unset, env, exit.)
 		// ➤ Sinon, lancer l'exec : execve avec fork
 		// ➤ Gérer les pipes/redirections plus tard ici ou avec redirect.c
-
-		if (strcmp(user_input, "exit") == 0)
-		{
-			free(user_input);
-			break;
-		}
 		/////////////////////////////////////
 		// DEBUGGING : A RETIRER PLUS TARD //
 		/////////////////////////////////////
-		printf("%sShell original:\n%s", GREEN, RST);
+		/*printf("%sShell original:\n%s", GREEN, RST);
 		FILE *fp = popen(user_input, "r");
 		if (fp)
 		{
@@ -123,7 +115,7 @@ int	main(int argc, char **argv, char **envp)
 		printf("%s=================%s\n", RED, RST);
 		printf("%s=== DEBUGGING ===%s\n", RED, RST);
 		printf("%s=================%s\n", RED, RST);
-		printf("\n%sCommande reçue :%s %s\n\n", CYAN, RST, user_input); 
+		printf("\n%sCommande reçue :%s %s\n\n", CYAN, RST, user_input); */
 		print_tab(args);
 		/////////////////////////////////////
 		//          FIN DEBUGGING		   //
