@@ -2,11 +2,11 @@
 /*                                                                            */
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: cjauregu <cjauregu@student.42lausanne.c    +#+  +:+       +#+        */
+/*                                                    +:+         +:+     */
+/*   By: grohr <grohr@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/23 22:28:36 by grohr             #+#    #+#             */
-/*   Updated: 2025/05/01 12:22:10 by cjauregu         ###   ########.fr       */
+/*   Updated: 2025/05/05 20:00:00 by grohr            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,6 +63,7 @@ int	main(int argc, char **argv, char **envp)
 {
 	char		*user_input;
 	char		**args;
+	char		**cleaned_args;
 	char		**env;
 
 	(void)argc;
@@ -90,11 +91,21 @@ int	main(int argc, char **argv, char **envp)
 		// ==== ✳️ GESTION DES BUILTINS ET COMMANDES ✳️ ====
 		// ➤ Parsing de l'input :
 		args = tokenize_input(user_input, 0, 0, 0);
-		if (is_builtin(args[0]))
-			execute_builtin(args, &env);
-		else
-			execute_external(args, env); 	//si c'est pas un builtin, on execute
+		if (!args)
+		{
+			free(user_input);
+			continue;
+		}
+		// ➤ Handle redirections and execute command
+		cleaned_args = handle_redirections(args, &env);
+		free_tab(args);
+		if (!cleaned_args)
+		{
+			free(user_input);
+			continue;
+		}
 
+		// ➤ On a execute builtin et execute external dans redirect_utils.c (a la fin)
 		// ➤ Vérifier si c’est un builtin (cd, echo, pwd, export, unset, env, exit.)
 		// ➤ Sinon, lancer l'exec : execve avec fork
 		// ➤ Gérer les pipes/redirections plus tard ici ou avec redirect.c
@@ -116,12 +127,12 @@ int	main(int argc, char **argv, char **envp)
 		printf("%s=== DEBUGGING ===%s\n", RED, RST);
 		printf("%s=================%s\n", RED, RST);
 		printf("\n%sCommande reçue :%s %s\n\n", CYAN, RST, user_input); */
-		print_tab(args);
+		print_tab(cleaned_args);
 		/////////////////////////////////////
 		//          FIN DEBUGGING		   //
 		/////////////////////////////////////
 		free(user_input);
-		free_tab(args); // free du tableau de tokens
+		free_tab(cleaned_args);
 	}
 
 	// ==== ✳️ TODO: LIBÉRATION MÉMOIRE STRUCTURES ====

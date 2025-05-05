@@ -15,6 +15,7 @@ SRCS =	src/builtins_main.c \
 		src/env.c \
 		src/exec.c \
 		src/main.c \
+		src/redirect_utils.c \
 		src/redirect.c \
 		src/signals.c \
 		src/tokenizer.c \

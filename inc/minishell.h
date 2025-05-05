@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cjauregu <cjauregu@student.42lausanne.c    +#+  +:+       +#+        */
+/*   By: grohr <grohr@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/23 22:28:10 by grohr             #+#    #+#             */
-/*   Updated: 2025/04/30 13:35:51 by cjauregu         ###   ########.fr       */
+/*   Updated: 2025/05/05 16:09:34 by grohr            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,8 +17,9 @@
 # include "builtins.h"
 # include "env.h"
 # include "exec.h"
-# include "tokenizer.h"
+# include "redirect.h"
 # include "signals.h"
+# include "tokenizer.h"
 
 #define RED     "\033[1;31m"
 #define GREEN   "\033[1;32m"
