@@ -6,7 +6,7 @@
 /*   By: grohr <grohr@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/23 22:29:03 by grohr             #+#    #+#             */
-/*   Updated: 2025/04/23 22:31:03 by grohr            ###   ########.fr       */
+/*   Updated: 2025/05/05 15:28:01 by grohr            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,7 +67,11 @@ int	execute_external(char **args, char **envp)
 		int i = 0;
 		while (args[i])
 		{
-			remove_quotes(args[i]); // Supprime quotes avant exec parce que j'avais
+			char *tmp = remove_quotes(args[i]);
+			free(args[i]);
+			args[i] = tmp;
+
+			//remove_quotes(args[i]); // Supprime quotes avant exec parce que j'avais
 			i++;							// laissé dans les tokens pour pas confondre l;exec de ' et "
 		}
 		if (execvp(args[0], args) == -1)

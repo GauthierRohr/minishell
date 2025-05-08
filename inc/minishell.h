@@ -6,7 +6,7 @@
 /*   By: grohr <grohr@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/23 22:28:10 by grohr             #+#    #+#             */
-/*   Updated: 2025/04/23 23:27:31 by grohr            ###   ########.fr       */
+/*   Updated: 2025/05/05 16:09:34 by grohr            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,8 @@
 # include "builtins.h"
 # include "env.h"
 # include "exec.h"
+# include "redirect.h"
+# include "signals.h"
 # include "tokenizer.h"
 
 #define RED     "\033[1;31m"
@@ -39,6 +41,7 @@
 # include <sys/stat.h>
 # include <sys/wait.h>
 # include <sys/ioctl.h>
+# include <signal.h>
 # include <readline/readline.h>
 # include <readline/history.h>
 # include <curses.h>

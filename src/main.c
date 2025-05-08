@@ -2,11 +2,15 @@
 /*                                                                            */
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
+/*                                                    +:+         +:+     */
 /*   By: grohr <grohr@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/23 22:28:36 by grohr             #+#    #+#             */
+<<<<<<< HEAD
 /*   Updated: 2025/04/28 15:38:43 by grohr            ###   ########.fr       */
+=======
+/*   Updated: 2025/05/05 20:00:00 by grohr            ###   ########.fr       */
+>>>>>>> 380582248616649e460a48c2c570f9d8bbc5d95f
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,6 +67,7 @@ int	main(int argc, char **argv, char **envp)
 {
 	char		*user_input;
 	char		**args;
+	char		**cleaned_args;
 	char		**env;
 
 	(void)argc;
@@ -72,15 +77,13 @@ int	main(int argc, char **argv, char **envp)
 		return (1);
 	using_history();
 	user_input = NULL;
+	init_signals();
 	while (1)
 	{
 		user_input = readline("minishell> ");
 		// Si l'utilisateur appuie sur Ctrl+D (EOF)
 		if (user_input == NULL)
-		{
-			write(1, "exit\n", 5);
 			break;
-		}
 		// Ignore lignes vides + les ajoute pas à l'historique
 		if (user_input[0] == '\0')
 		{
@@ -92,23 +95,28 @@ int	main(int argc, char **argv, char **envp)
 		// ==== ✳️ GESTION DES BUILTINS ET COMMANDES ✳️ ====
 		// ➤ Parsing de l'input :
 		args = tokenize_input(user_input, 0, 0, 0);
-		if (is_builtin(args[0]))
-			execute_builtin(args, &env);
-		else
-			execute_external(args, env); 	//si c'est pas un builtin, on execute
+		if (!args)
+		{
+			free(user_input);
+			continue;
+		}
+		// ➤ Handle redirections and execute command
+		cleaned_args = handle_redirections(args, &env);
+		free_tab(args);
+		if (!cleaned_args)
+		{
+			free(user_input);
+			continue;
+		}
 
+		// ➤ On a execute builtin et execute external dans redirect_utils.c (a la fin)
 		// ➤ Vérifier si c’est un builtin (cd, echo, pwd, export, unset, env, exit.)
 		// ➤ Sinon, lancer l'exec : execve avec fork
 		// ➤ Gérer les pipes/redirections plus tard ici ou avec redirect.c
-
-		if (strcmp(user_input, "exit") == 0)
-		{
-			free(user_input);
-			break;
-		}
 		/////////////////////////////////////
 		// DEBUGGING : A RETIRER PLUS TARD //
 		/////////////////////////////////////
+<<<<<<< HEAD
 
 		// printf("%sShell original:\n%s", GREEN, RST);
 		// FILE *fp = popen(user_input, "r");
@@ -122,16 +130,29 @@ int	main(int argc, char **argv, char **envp)
 		//     pclose(fp);
 		// }
 		
+=======
+		/*printf("%sShell original:\n%s", GREEN, RST);
+		FILE *fp = popen(user_input, "r");
+		if (fp)
+		{
+		    char buffer[1024];
+		    while (fgets(buffer, sizeof(buffer), fp) != NULL)
+		    {
+		        printf("%s", buffer);  // Affiche tel quel sans modification
+		    }
+		    pclose(fp);
+		}
+>>>>>>> 380582248616649e460a48c2c570f9d8bbc5d95f
 		printf("%s=================%s\n", RED, RST);
 		printf("%s=== DEBUGGING ===%s\n", RED, RST);
 		printf("%s=================%s\n", RED, RST);
-		printf("\n%sCommande reçue :%s %s\n\n", CYAN, RST, user_input); 
-		print_tab(args);
+		printf("\n%sCommande reçue :%s %s\n\n", CYAN, RST, user_input); */
+		print_tab(cleaned_args);
 		/////////////////////////////////////
 		//          FIN DEBUGGING		   //
 		/////////////////////////////////////
 		free(user_input);
-		free_tab(args); // free du tableau de tokens
+		free_tab(cleaned_args);
 	}
 
 	// ==== ✳️ TODO: LIBÉRATION MÉMOIRE STRUCTURES ====
