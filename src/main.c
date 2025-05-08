@@ -6,11 +6,7 @@
 /*   By: grohr <grohr@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/23 22:28:36 by grohr             #+#    #+#             */
-<<<<<<< HEAD
 /*   Updated: 2025/04/28 15:38:43 by grohr            ###   ########.fr       */
-=======
-/*   Updated: 2025/05/05 20:00:00 by grohr            ###   ########.fr       */
->>>>>>> 380582248616649e460a48c2c570f9d8bbc5d95f
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -116,7 +112,6 @@ int	main(int argc, char **argv, char **envp)
 		/////////////////////////////////////
 		// DEBUGGING : A RETIRER PLUS TARD //
 		/////////////////////////////////////
-<<<<<<< HEAD
 
 		// printf("%sShell original:\n%s", GREEN, RST);
 		// FILE *fp = popen(user_input, "r");
@@ -130,23 +125,10 @@ int	main(int argc, char **argv, char **envp)
 		//     pclose(fp);
 		// }
 		
-=======
-		/*printf("%sShell original:\n%s", GREEN, RST);
-		FILE *fp = popen(user_input, "r");
-		if (fp)
-		{
-		    char buffer[1024];
-		    while (fgets(buffer, sizeof(buffer), fp) != NULL)
-		    {
-		        printf("%s", buffer);  // Affiche tel quel sans modification
-		    }
-		    pclose(fp);
-		}
->>>>>>> 380582248616649e460a48c2c570f9d8bbc5d95f
 		printf("%s=================%s\n", RED, RST);
 		printf("%s=== DEBUGGING ===%s\n", RED, RST);
 		printf("%s=================%s\n", RED, RST);
-		printf("\n%sCommande reçue :%s %s\n\n", CYAN, RST, user_input); */
+		printf("\n%sCommande reçue :%s %s\n\n", CYAN, RST, user_input);
 		print_tab(cleaned_args);
 		/////////////////////////////////////
 		//          FIN DEBUGGING		   //

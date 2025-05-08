@@ -4,6 +4,26 @@
 #include <string.h>
 #include <stdio.h>
 
+// Extrait un token entre quotes, et retourne l’indice juste après la quote fermante
+int extract_quoted_token(const char *input, int *i, char quote, char ***tokens, int *size)
+{
+	int		start;
+	char	*token;
+
+	(*i)++; // Skip opening quote
+	start = *i;
+	while (input[*i] && input[*i] != quote)
+		(*i)++;
+	if (input[*i] == quote)
+	{
+		token = extract_token(input, start, *i);
+		if (!add_token(tokens, size, token))
+			return (0);
+		(*i)++; // Skip closing quote
+	}
+	return (1);
+}
+
 // Met à jour l’état des guillemets lors du parsing (general, simple quote, double quote)
 static void	update_state_quote(t_state *state, char c)
 {
@@ -80,11 +100,9 @@ static int	handle_special_token(const char *input, int *i, int *start,
 // Fonction principale : découpe l'input en tokens en gérant quotes et caractères spéciaux
 char	**tokenize_input(const char *input, int size, int i, int start)
 {
-	char	**tokens;
-	t_state	state;
+	char	**tokens = NULL;
+	t_state	state = STATE_GENERAL;
 
-	tokens = NULL;
-	state = STATE_GENERAL;
 	while (input[i])
 	{
 		if (state == STATE_GENERAL)
@@ -93,13 +111,26 @@ char	**tokenize_input(const char *input, int size, int i, int start)
 			{
 				if (!handle_special_token(input, &i, &start, &tokens, &size))
 					return (NULL);
-				continue ;
+				continue;
 			}
 			else if (input[i] == ' ')
 			{
 				if (!handle_space_token(input, &i, &start, &tokens, &size))
 					return (NULL);
-				continue ;
+				continue;
+			}
+			else if (input[i] == '\'' || input[i] == '\"')
+			{
+				if (start < i)
+				{
+					char *pre_token = extract_token(input, start, i);
+					if (!add_token(&tokens, &size, pre_token))
+						return (NULL);
+				}
+				if (!extract_quoted_token(input, &i, input[i], &tokens, &size))
+					return (NULL);
+				start = i;
+				continue;
 			}
 		}
 		update_state_quote(&state, input[i]);

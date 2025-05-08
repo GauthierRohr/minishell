@@ -6,7 +6,7 @@
 /*   By: grohr <grohr@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/23 22:28:08 by grohr             #+#    #+#             */
-/*   Updated: 2025/05/08 16:00:31 by grohr            ###   ########.fr       */
+/*   Updated: 2025/05/08 17:53:28 by grohr            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,41 +37,35 @@ char	*get_env_value(const char *name, char **env)
 char	*expand_vars(const char *token, char **env)
 {
 	char	*expanded;
-	const char	*dollar;
 	char	var_name[256];
+	const char	*ptr = token;
+	int		i = 0, j = 0;
 	char	*value;
-	int		i = 0;
 
-	dollar = ft_strchr(token, '$');
-	if (!dollar)
-		return (ft_strdup(token));
-
-	expanded = malloc(ft_strlen(token) + 256); // assez large pour contenir la valeur
+	expanded = malloc(4096); // buffer large (à améliorer plus tard avec realloc)
 	if (!expanded)
 		return (NULL);
 
-	while (token[i] && token[i] != '$')
+	while (*ptr)
 	{
-		expanded[i] = token[i];
-		i++;
+		if (*ptr == '$' && *(ptr + 1) && (ft_isalpha(*(ptr + 1)) || *(ptr + 1) == '_'))
+		{
+			ptr++;
+			i = 0;
+			while (*ptr && (ft_isalnum(*ptr) || *ptr == '_'))
+				var_name[i++] = *ptr++;
+			var_name[i] = '\0';
+			value = get_env_value(var_name, env);
+			if (value)
+			{
+				while (*value)
+					expanded[j++] = *value++;
+			}
+		}
+		else
+			expanded[j++] = *ptr++;
 	}
-	expanded[i] = '\0';
-
-	int j = 0;
-	i++; // skip le $
-	while (token[i] && (ft_isalnum(token[i]) || token[i] == '_'))
-		var_name[j++] = token[i++];
-	var_name[j] = '\0';
-
-	value = get_env_value(var_name, env);
-	if (value)
-		strcat(expanded, value);
-	else
-		strcat(expanded, "");
-
-	if (token[i])
-		strcat(expanded, &token[i]);
-
+	expanded[j] = '\0';
 	return (expanded);
 }
 
@@ -223,7 +217,7 @@ int	builtin_export(char **args, char ***env)
 			if (env_index != -1)
 			{
 				free((*env)[env_index]);
-				(*env)[env_index] = ft_strdup(args[i]);
+				(*env)[env_index] = ft_strdup((*equal_sign = '=' , args[i]));
 			}
 			else
 			{
