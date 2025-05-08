@@ -6,7 +6,7 @@
 /*   By: grohr <grohr@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/23 22:28:08 by grohr             #+#    #+#             */
-/*   Updated: 2025/05/08 17:53:28 by grohr            ###   ########.fr       */
+/*   Updated: 2025/05/08 18:37:19 by grohr            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,6 @@
 #include <string.h>
 
 // Pour prendre en compte les echo $PWD ou autres commandes
-
 char	*get_env_value(const char *name, char **env)
 {
 	int		i;
@@ -60,6 +59,10 @@ char	*expand_vars(const char *token, char **env)
 			{
 				while (*value)
 					expanded[j++] = *value++;
+			}
+			else
+			{
+				printf("VAR '%s' not found in env!\n", var_name);  // Debugging line
 			}
 		}
 		else
@@ -187,54 +190,59 @@ int	count_array(char **array)
 //
 // return 0 en cas de succès, 1 en cas d'erreur
 //
-int	builtin_export(char **args, char ***env)
+int builtin_export(char **args, char ***env)
 {
-	int		i;
-	int		env_index;
-	char	**new_env;
-	int		env_size;
-	char	*equal_sign;
+    int i;
+    int env_index;
+    char **new_env;
+    int env_size;
+    char *equal_sign;
 
-	if (!args[1])
-	{
-		i = 0;
-		while ((*env)[i])
-		{
-			printf("declare -x %s\n", (*env)[i]);
-			i++;
-		}
-		return (0);
-	}
-	i = 1;
-	while (args[i])
-	{
-		equal_sign = strchr(args[i], '=');
-		if (equal_sign)
-		{
-			*equal_sign = '\0';
-			env_index = find_env_var(*env, args[i]);
-			*equal_sign = '=';
-			if (env_index != -1)
-			{
-				free((*env)[env_index]);
-				(*env)[env_index] = ft_strdup((*equal_sign = '=' , args[i]));
-			}
-			else
-			{
-				env_size = count_array(*env);
-				new_env = malloc(sizeof(char *) * (env_size + 2));
-				if (!new_env)
-					return (1);
-				env_size = -1;
-				while ((*env)[++env_size])
-					new_env[env_size] = (*env)[env_size];
-				new_env[env_size] = ft_strdup(args[i]);
-				new_env[env_size + 1] = NULL;
-				free(*env);
-				*env = new_env;
-			}
-		}
-		i++;
-	}
-	return (0);
+    if (!args[1])
+    {
+        // Afficher l'environnement (comme avant)
+        i = 0;
+        while ((*env)[i])
+        {
+            printf("declare -x %s\n", (*env)[i]);
+            i++;
+        }
+        return (0);
+    }
+
+    i = 1;
+    while (args[i])
+    {
+        equal_sign = ft_strchr(args[i], '=');
+        if (equal_sign)
+        {
+            *equal_sign = '\0'; // Temporairement couper pour vérifier la clé
+            env_index = find_env_var(*env, args[i]);
+            *equal_sign = '='; // Remettre l'égal
+
+            if (env_index != -1)
+            {
+                // Variable existe déjà - la remplacer
+                free((*env)[env_index]);
+                (*env)[env_index] = ft_strdup(args[i]);
+            }
+            else
+            {
+                // Nouvelle variable - l'ajouter
+                env_size = count_array(*env);
+                new_env = malloc(sizeof(char *) * (env_size + 2));
+                if (!new_env)
+                    return (1);
+                
+                ft_memcpy(new_env, *env, sizeof(char *) * env_size);
+                new_env[env_size] = ft_strdup(args[i]);
+                new_env[env_size + 1] = NULL;
+                
+                free(*env);
+                *env = new_env;
+            }
+        }
+        i++;
+    }
+    return (0);
 }

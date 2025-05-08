@@ -96,7 +96,28 @@ int	main(int argc, char **argv, char **envp)
 			free(user_input);
 			continue;
 		}
-		// ➤ Handle redirections and execute command
+		// Vérifie si c'est une assignation de variable avant d'exécuter une commande
+		if (ft_strchr(args[0], '=') && ft_strchr(args[0], '=') != args[0]) // Vérifie si c'est une assignation de variable & que = est pas à la 1ere place
+		{
+			char *tmp[3];
+			tmp[0] = "export"; // Nous utilisons export pour gérer l'assignation
+			tmp[1] = args[0];  // La variable à exporter (ex: "VAR=30")
+			tmp[2] = NULL;
+			
+			builtin_export(tmp, &env);
+			free_tab(args);
+			free(user_input);
+			continue;
+		}
+		// ➤ Gérer les assignations simples (ex: VAR=42)
+		if (ft_strchr(args[0], '=') && ft_strchr(args[0], '=') != args[0])
+		{
+			builtin_export(args, &env);
+			free_tab(args);
+			free(user_input);
+			continue;
+		}
+		// ➤ Gérer les redirections & executer les commandes
 		cleaned_args = handle_redirections(args, &env);
 		free_tab(args);
 		if (!cleaned_args)

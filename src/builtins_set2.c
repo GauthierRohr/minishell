@@ -6,7 +6,7 @@
 /*   By: grohr <grohr@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/23 22:28:19 by grohr             #+#    #+#             */
-/*   Updated: 2025/04/23 22:28:20 by grohr            ###   ########.fr       */
+/*   Updated: 2025/05/08 18:38:26 by grohr            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,20 +19,22 @@
 //
 // also used in builtins_set1.c 
 //
-int	find_env_var(char **env, const char *var)
+int find_env_var(char **env, const char *var)
 {
-	int		i;
-	size_t	len;
+    int i;
+    size_t len;
 
-	i = 0;
-	len = strlen(var);
-	while (env[i])
-	{
-		if (ft_strncmp(env[i], var, len) == 0 && env[i][len] == '=')
-			return (i);
-		i++;
-	}
-	return (-1);
+    if (!env || !var)
+        return (-1);
+    len = ft_strlen(var);
+    i = 0;
+    while (env[i])
+    {
+        if (ft_strncmp(env[i], var, len) == 0 && env[i][len] == '=')
+            return (i);
+        i++;
+    }
+    return (-1);
 }
 
 // Gère la commande unset pour supprimer des variables d'environnement
