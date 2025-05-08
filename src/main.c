@@ -125,7 +125,6 @@ int	main(int argc, char **argv, char **envp)
 			free(user_input);
 			continue;
 		}
-
 		// ➤ On a execute builtin et execute external dans redirect_utils.c (a la fin)
 		// ➤ Vérifier si c’est un builtin (cd, echo, pwd, export, unset, env, exit.)
 		// ➤ Sinon, lancer l'exec : execve avec fork
@@ -145,7 +144,8 @@ int	main(int argc, char **argv, char **envp)
 		//     }
 		//     pclose(fp);
 		// }
-		
+
+		/*	
 		printf("%s=================%s\n", RED, RST);
 		printf("%s=== DEBUGGING ===%s\n", RED, RST);
 		printf("%s=================%s\n", RED, RST);
@@ -156,6 +156,7 @@ int	main(int argc, char **argv, char **envp)
 		/////////////////////////////////////
 		free(user_input);
 		free_tab(cleaned_args);
+		*/
 	}
 
 	// ==== ✳️ TODO: LIBÉRATION MÉMOIRE STRUCTURES ====

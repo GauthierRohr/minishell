@@ -6,19 +6,13 @@
 /*   By: grohr <grohr@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/23 22:28:19 by grohr             #+#    #+#             */
-/*   Updated: 2025/05/08 18:38:26 by grohr            ###   ########.fr       */
+/*   Updated: 2025/05/08 19:43:19 by grohr            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../inc/minishell.h"
 
-//Recherche une variable d'environnement
-//
-// var Nom de la variable à chercher
-// return : Index de la variable ou -1 si non trouvée
-//
-// also used in builtins_set1.c 
-//
+// Recherche une variable d'environnement
 int find_env_var(char **env, const char *var)
 {
     int i;
@@ -37,76 +31,108 @@ int find_env_var(char **env, const char *var)
     return (-1);
 }
 
-// Gère la commande unset pour supprimer des variables d'environnement
-//
-// return 0 en cas de succès
-// 
-int	builtin_unset(char **args, char ***env)
+// Vérifie si une variable est définie par l'utilisateur
+static int is_user_defined_var(const char *var)
 {
-	int		i;
-	int		j;
-	int		env_index;
-	char	**new_env;
-	int		env_size;
-
-	i = 1;
-	while (args[i])
+    // Liste des variables système à conserver
+    const char *system_vars[] =
 	{
-		env_index = find_env_var(*env, args[i]);
-		if (env_index != -1)
-		{
-			env_size = count_array(*env);
-			new_env = malloc(sizeof(char *) * env_size);
-			if (!new_env)
-				return (1);
-			j = 0;
-			env_size = 0;
-			while ((*env)[j])
-			{
-				if (j != env_index)
-					new_env[env_size++] = (*env)[j];
-				else
-					free((*env)[j]);
-				j++;
-			}
-			new_env[env_size] = NULL;
-			free(*env);
-			*env = new_env;
-		}
-		i++;
-	}
-	return (0);
+        "PATH", "HOME", "USER", "SHELL", "PWD",
+        "OLDPWD", "SHLVL", "_", "TERM", "LANG",
+        "MallocNanoZone", "SECURITYSESSIONID", "COMMAND_MODE",
+        "__CFBundleIdentifier", "LaunchInstanceID", "__CF_USER_TEXT_ENCODING",
+        "XPC_SERVICE_NAME", "SSH_AUTH_SOCK", "XPC_FLAGS", "LOGNAME",
+        "TMPDIR", "ORIGINAL_XDG_CURRENT_DESKTOP", "HOMEBREW_PREFIX",
+        "HOMEBREW_CELLAR", "HOMEBREW_REPOSITORY", "INFOPATH",
+        "TERM_PROGRAM", "TERM_PROGRAM_VERSION", "COLORTERM",
+        "GIT_ASKPASS", "VSCODE_GIT_ASKPASS_NODE", "VSCODE_GIT_ASKPASS_EXTRA_ARGS",
+        "VSCODE_GIT_ASKPASS_MAIN", "VSCODE_GIT_IPC_HANDLE", "VSCODE_INJECTION",
+        "ZDOTDIR", "USER_ZDOTDIR", "VSCODE_PROFILE_INITIALIZED",
+        NULL
+    };
+    
+    char *name;
+    int i = 0;
+    
+    // Extraire le nom de la variable (avant le '=')
+    name = ft_substr(var, 0, ft_strchr(var, '=') - var);
+    if (!name)
+        return (0);
+    
+    // Vérifier si c'est une variable système
+    while (system_vars[i])
+    {
+        if (ft_strcmp(name, system_vars[i]) == 0)
+        {
+            free(name);
+            return (0); // C'est une variable système
+        }
+        i++;
+    }
+    free(name);
+    return (1); // C'est une variable utilisateur
 }
 
-// Gère la commande env pour afficher l'environnement
-//
-// return 0 en cas de succès
-//
-int	builtin_env(char **env)
+// Gère la commande unset
+int builtin_unset(char **args, char ***env)
 {
-	int	i;
-
-	i = 0;
-	while (env[i])
-	{
-		printf("%s\n", env[i]);
-		i++;
-	}
-	return (0);
+    int i;
+    int env_index;
+    
+    if (args[1]) // Si on a des arguments, erreur
+    {
+        ft_putstr_fd("unset: this shell only supports 'unset' without args\n", 2);
+        return (1);
+    }
+    
+    i = 0;
+    while ((*env)[i])
+    {
+        if (is_user_defined_var((*env)[i]))
+        {
+            // Supprimer cette variable
+            free((*env)[i]);
+            // Décaler le reste du tableau
+            env_index = i;
+            while ((*env)[env_index + 1])
+            {
+                (*env)[env_index] = (*env)[env_index + 1];
+                env_index++;
+            }
+            (*env)[env_index] = NULL;
+            // On ne décrémente pas i pour vérifier la nouvelle case [i]
+        }
+        else
+        {
+            i++; // Passer à la suivante
+        }
+    }
+    return (0);
 }
 
-// Gère la commande exit pour quitter le shell
-//
-// return exit_code, ou 0 si erreur
-// 
-int	builtin_exit(char **args)
+// Gère la commande env
+int builtin_env(char **env)
 {
-	int	exit_code;
+    int i;
 
-	printf("exit\n");
-	if (!args[1])
-		exit(0);
-	exit_code = ft_atoi(args[1]);
-	exit(exit_code);
-	return (0);
+    i = 0;
+    while (env[i])
+    {
+        printf("%s\n", env[i]);
+        i++;
+    }
+    return (0);
+}
+
+// Gère la commande exit
+int builtin_exit(char **args)
+{
+    int exit_code;
+
+    printf("exit\n");
+    if (!args[1])
+        exit(0);
+    exit_code = ft_atoi(args[1]);
+    exit(exit_code);
+    return (0);
 }
