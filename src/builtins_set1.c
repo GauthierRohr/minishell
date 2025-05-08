@@ -6,7 +6,7 @@
 /*   By: grohr <grohr@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/23 22:28:08 by grohr             #+#    #+#             */
-/*   Updated: 2025/04/23 23:40:09 by grohr            ###   ########.fr       */
+/*   Updated: 2025/05/08 16:00:31 by grohr            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -114,6 +114,16 @@ int	builtin_echo(char **args, char ***env)
 //
 // return 0 en cas de succès, 1 en cas d'erreur
 //
+// getcwd(current_dir, sizeof(current_dir))
+// Appelle getcwd pour stocker le chemin actuel dans le buffer current_dir.
+// Le second argument est la taille max qu'on autorise à écrire dedans (ici 1024).
+//
+// chdir() tente de changer le répertoire de travail courant du processus
+// vers le chemin donné (target_dir). Il retourne :
+// 		-> 0 en cas de succès
+// 		-> -1 en cas d'erreur (ex : chemin invalide, permissions refusées)
+// Donc si chdir(...) != 0, cela signifie que le changement a échoué.
+//
 int	builtin_cd(char **args, char ***env)
 {
 	char	*home_path;
@@ -145,7 +155,6 @@ int	builtin_cd(char **args, char ***env)
 	}
 	return (0);
 }
-
  
 // Gère la commande pwd pour afficher le répertoire courant
 // 

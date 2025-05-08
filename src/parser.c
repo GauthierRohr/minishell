@@ -11,9 +11,7 @@ Commence par transformer la ligne de commande en une liste de tokens en respecta
 	•	Guillemets simples ' : tout ce qui est entre ' est un token unique, sans interprétation des variables ou des caractères spéciaux.
 	•	Guillemets doubles " : le contenu est un token unique, mais les variables ($VAR) y sont interprétées.
 	•	Caractères spéciaux : les symboles comme |, <, >, >>, << doivent être identifiés comme des tokens distincts.
-	•	Espaces : utilise-les pour séparer les tokens, sauf lorsqu’ils sont à l’intérieur de guillemets.
-
-Pour gérer cette phase, tu peux implémenter un automate fini qui lit caractère par caractère, en maintenant un état (par exemple : normal, dans des guillemets simples, dans des guillemets doubles) pour déterminer comment traiter chaque caractère.
+	•	Espaces : séparer les tokens, sauf lorsqu’ils sont à l’intérieur de guillemets.
 
 ⸻
 
@@ -24,13 +22,14 @@ Une fois la tokenisation effectuée, organise les tokens en une structure reflé
 	•	Redirections : associe les tokens de redirection (<, >, etc.) avec les fichiers correspondants.
 	•	Pipes : sépare les différentes commandes reliées par des pipes (|) en sous-structures.
 
-Cette structure te permettra de gérer l’exécution des commandes, les redirections et les pipes de manière organisée.
+Permettra de gérer l’exécution des commandes, les redirections et les pipes de manière organisée.
 
 ⸻
 
 🔄 3. Évaluation des Variables et Expansion
 
-Avant l’exécution, remplace les variables ($VAR, $?, etc.) par leurs valeurs actuelles. Assure-toi de ne pas effectuer cette expansion à l’intérieur des guillemets simples, conformément au comportement standard des shells.
+Avant l’exécution, remplace les variables ($VAR, $?, etc.) par leurs valeurs actuelles.
+S'assurer de ne pas effectuer cette expansion à l’intérieur des guillemets simples ' ' : comportement standard des shells.
 
 ⸻
 
@@ -45,21 +44,24 @@ Avec la structure de commande prête : ￼
 
 🧩 5. Gestion des Signaux
 
-Implémente des gestionnaires pour les signaux comme SIGINT (Ctrl-C) et SIGQUIT (Ctrl-) pour que ton shell réagisse de manière appropriée, par exemple en interrompant l’exécution d’une commande ou en affichant une nouvelle invite.
+Implémente des gestionnaires pour les signaux comme :
+	- SIGINT (Ctrl-C)
+	- SIGQUIT (Ctrl-)
+Pour que le shell réagisse de manière appropriée. 
+Par exemple en interrompant l’exécution d’une commande ou en affichant une nouvelle invite.
 
 ⸻
 
 📁 6. Organisation du Code
 
-Pour une meilleure maintenabilité, sépare ton code en plusieurs fichiers :
+Pour une meilleure maintenabilité, on sépare le code en plusieurs fichiers :
 	•	tokenizer.c : gestion de la tokenisation.
 	•	parser.c : construction de la structure de commande.
 	•	executor.c : exécution des commandes.
 	•	signals.c : gestion des signaux.
 	•	env.c : gestion des variables d’environnement.
-
-Cette organisation te permettra de travailler plus efficacement et de faciliter le débogage.
 */
+
 char	**split_input(char *input)
 {
 

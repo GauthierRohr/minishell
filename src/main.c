@@ -6,7 +6,7 @@
 /*   By: grohr <grohr@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/23 22:28:36 by grohr             #+#    #+#             */
-/*   Updated: 2025/04/23 23:28:12 by grohr            ###   ########.fr       */
+/*   Updated: 2025/04/28 15:38:43 by grohr            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -109,17 +109,19 @@ int	main(int argc, char **argv, char **envp)
 		/////////////////////////////////////
 		// DEBUGGING : A RETIRER PLUS TARD //
 		/////////////////////////////////////
-		printf("%sShell original:\n%s", GREEN, RST);
-		FILE *fp = popen(user_input, "r");
-		if (fp)
-		{
-		    char buffer[1024];
-		    while (fgets(buffer, sizeof(buffer), fp) != NULL)
-		    {
-		        printf("%s", buffer);  // Affiche tel quel sans modification
-		    }
-		    pclose(fp);
-		}
+
+		// printf("%sShell original:\n%s", GREEN, RST);
+		// FILE *fp = popen(user_input, "r");
+		// if (fp)
+		// {
+		//     char buffer[1024];
+		//     while (fgets(buffer, sizeof(buffer), fp) != NULL)
+		//     {
+		//         printf("%s", buffer);  // Affiche tel quel sans modification
+		//     }
+		//     pclose(fp);
+		// }
+		
 		printf("%s=================%s\n", RED, RST);
 		printf("%s=== DEBUGGING ===%s\n", RED, RST);
 		printf("%s=================%s\n", RED, RST);
