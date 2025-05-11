@@ -6,9 +6,6 @@ CONSIGNES DU SUJET :
 Your shell should:
 
 A FAIRE :
-• Handle $? which should expand to the exit status of the most recently executed
-foreground pipeline.
--> $? affiche toujours le code de retour de la commande précédente.
 
 A VERIFIER :
 • Not interpret unclosed quotes or special characters which are not required by the
@@ -53,3 +50,7 @@ should expand to their values.
 ◦ unset with no options
 ◦ env with no options or arguments
 ◦ exit with no options
+
+• Handle $? which should expand to the exit status of the most recently executed
+foreground pipeline.
+-> $? affiche toujours le code de retour de la commande précédente.
