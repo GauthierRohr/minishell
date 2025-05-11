@@ -6,7 +6,7 @@
 /*   By: grohr <grohr@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/23 22:28:19 by grohr             #+#    #+#             */
-/*   Updated: 2025/05/08 19:43:19 by grohr            ###   ########.fr       */
+/*   Updated: 2025/05/11 13:09:48 by grohr            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,9 +79,10 @@ int builtin_unset(char **args, char ***env)
     int i;
     int env_index;
     
-    if (args[1]) // Si on a des arguments, erreur
+    if (args[1])
     {
-        ft_putstr_fd("unset: this shell only supports 'unset' without args\n", 2);
+        ft_putstr_fd("minishell: unset: this shell only supports 'unset' without args\n", 2);
+        g_last_exit_status = 1;
         return (1);
     }
     
@@ -90,9 +91,7 @@ int builtin_unset(char **args, char ***env)
     {
         if (is_user_defined_var((*env)[i]))
         {
-            // Supprimer cette variable
             free((*env)[i]);
-            // Décaler le reste du tableau
             env_index = i;
             while ((*env)[env_index + 1])
             {
@@ -100,13 +99,13 @@ int builtin_unset(char **args, char ***env)
                 env_index++;
             }
             (*env)[env_index] = NULL;
-            // On ne décrémente pas i pour vérifier la nouvelle case [i]
         }
         else
         {
-            i++; // Passer à la suivante
+            i++;
         }
     }
+    g_last_exit_status = 0;
     return (0);
 }
 
@@ -121,18 +120,20 @@ int builtin_env(char **env)
         printf("%s\n", env[i]);
         i++;
     }
+    g_last_exit_status = 0;
     return (0);
 }
 
 // Gère la commande exit
 int builtin_exit(char **args)
 {
-    int exit_code;
-
     printf("exit\n");
     if (!args[1])
+    {
+        g_last_exit_status = 0;
         exit(0);
-    exit_code = ft_atoi(args[1]);
-    exit(exit_code);
+    }
+    g_last_exit_status = ft_atoi(args[1]);
+    exit(g_last_exit_status);
     return (0);
 }

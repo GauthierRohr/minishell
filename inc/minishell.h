@@ -6,7 +6,7 @@
 /*   By: grohr <grohr@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/23 22:28:10 by grohr             #+#    #+#             */
-/*   Updated: 2025/05/05 16:09:34 by grohr            ###   ########.fr       */
+/*   Updated: 2025/05/11 13:17:22 by grohr            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,5 +45,7 @@
 # include <readline/readline.h>
 # include <readline/history.h>
 # include <curses.h>
+
+extern int g_last_exit_status;
 
 #endif // MINISHELL_H

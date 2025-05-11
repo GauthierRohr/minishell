@@ -11,11 +11,9 @@
 /* ************************************************************************** */
 
 #include "../inc/minishell.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <readline/readline.h>
-#include <readline/history.h>
+
+//var globale declarée dans minishell.h
+int g_last_exit_status = 0;
 
 void	free_env(char **env)
 {

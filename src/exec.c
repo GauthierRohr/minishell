@@ -6,7 +6,7 @@
 /*   By: grohr <grohr@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/23 22:29:03 by grohr             #+#    #+#             */
-/*   Updated: 2025/05/05 15:28:01 by grohr            ###   ########.fr       */
+/*   Updated: 2025/05/11 13:12:11 by grohr            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,18 +50,19 @@ char	*remove_quotes(const char *str)
 }
 
 // Exécute une commande externe via fork + execvp
-int	execute_external(char **args, char **envp)
+int execute_external(char **args, char **envp)
 {
-	pid_t	pid;
-	int		status;
+    pid_t pid;
+    int status;
 
+    pid = fork();
 	(void)envp; // temporairement pas utilisé, a voir ce qu'on en fait
-	pid = fork();
-	if (pid < 0)
-	{
-		perror("fork");
-		return (1);
-	}
+    if (pid < 0)
+    {
+        perror("fork");
+        g_last_exit_status = 1;
+        return (1);
+    }
 	if (pid == 0)
 	{
 		int i = 0;
@@ -81,6 +82,10 @@ int	execute_external(char **args, char **envp)
 		}
 	}
 	else
-		waitpid(pid, &status, 0);
-	return (WEXITSTATUS(status));
+    {
+        waitpid(pid, &status, 0);
+        g_last_exit_status = WEXITSTATUS(status);
+        return (g_last_exit_status);
+    }
+	return (1);
 }
