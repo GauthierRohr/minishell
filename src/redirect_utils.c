@@ -120,6 +120,8 @@ char **handle_redirections(char **args, char ***env)
     {
         if (is_builtin(cleaned_args[0]))
             execute_builtin(cleaned_args, env);
+        else if (contains_pipe(cleaned_args))
+            find_args(cleaned_args);
         else
             execute_external(cleaned_args, *env);
     }

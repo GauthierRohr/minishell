@@ -20,6 +20,7 @@
 # include "redirect.h"
 # include "signals.h"
 # include "tokenizer.h"
+# include "piping.h"
 
 #define RED     "\033[1;31m"
 #define GREEN   "\033[1;32m"
