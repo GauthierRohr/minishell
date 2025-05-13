@@ -142,8 +142,7 @@ int	main(int argc, char **argv, char **envp)
 		//     }
 		//     pclose(fp);
 		// }
-
-		/*	
+		/*
 		printf("%s=================%s\n", RED, RST);
 		printf("%s=== DEBUGGING ===%s\n", RED, RST);
 		printf("%s=================%s\n", RED, RST);

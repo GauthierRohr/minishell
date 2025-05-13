@@ -6,7 +6,7 @@
 /*   By: grohr <grohr@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/23 22:28:08 by grohr             #+#    #+#             */
-/*   Updated: 2025/05/13 16:32:32 by grohr            ###   ########.fr       */
+/*   Updated: 2025/05/13 18:32:43 by grohr            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,8 +33,7 @@ char	*get_env_value(const char *name, char **env)
 	return (NULL);
 }
 
-// Dans builtins_set1.c, modifier expand_vars pour gérer $?
-char *expand_vars(const char *token, char **env)
+char *expand_vars(const char *token, char **env, t_state quote_state)
 {
     char *expanded;
     char var_name[256];
@@ -49,7 +48,8 @@ char *expand_vars(const char *token, char **env)
 
     while (*ptr)
     {
-        if (*ptr == '$' && *(ptr + 1))
+        // Ne pas expander dans les single quotes
+        if (*ptr == '$' && *(ptr + 1) && quote_state != STATE_IN_SINGLE_QUOTE)
         {
             ptr++;
             // pour "$?"
@@ -102,7 +102,12 @@ int builtin_echo(char **args, char ***env)
     char *tmp;
     int print_space = 0;
 
-    // Gestion de l'option -n
+    /*
+    printf("DEBUG: Entering builtin_echo\n");
+    for (int j = 0; args[j]; j++)
+        printf("DEBUG: args[%d] = '%s'\n", j, args[j]);
+    */
+
     if (args[1] && ft_strcmp(args[1], "-n") == 0)
     {
         n_option = 1;
@@ -111,41 +116,50 @@ int builtin_echo(char **args, char ***env)
 
     while (args[i])
     {
-        // Gestion des quotes et expansion
-        if (args[i][0] == '\'')
+        clean_arg = NULL;
+        //printf("DEBUG: Processing arg[%d]: '%s'\n", i, args[i]);
+
+        // Vérifie si l'argument est entièrement entouré de guillemets simples
+        if (args[i][0] == '\'' && args[i][ft_strlen(args[i]) - 1] == '\'')
         {
-            // Single quotes - pas d'expansion, enlever les quotes
+            //printf("DEBUG: Single quotes detected\n");
             tmp = remove_quotes(args[i]);
-            clean_arg = tmp;
-        }
-        else if (args[i][0] == '"')
-        {
-            // Double quotes - expansion des variables, enlever les quotes
-            tmp = remove_quotes(args[i]);
-            clean_arg = expand_vars(tmp, *env);
+            //printf("DEBUG: After remove_quotes: '%s'\n", tmp);
+            clean_arg = ft_strdup(tmp);
             free(tmp);
         }
+        // Vérifie si l'argument est entièrement entouré de guillemets doubles
+        else if (args[i][0] == '"' && args[i][ft_strlen(args[i]) - 1] == '"')
+        {
+            //printf("DEBUG: Double quotes detected\n");
+            tmp = remove_quotes(args[i]);
+            //printf("DEBUG: After remove_quotes: '%s'\n", tmp);
+            clean_arg = expand_vars(tmp, *env, STATE_IN_DOUBLE_QUOTE);
+            free(tmp);
+        }
+        // Cas général : traite les guillemets partiels ou non entourés
         else
         {
-            // Pas de quotes - expansion des variables
-            clean_arg = expand_vars(args[i], *env);
+            //printf("DEBUG: Partial or no quotes, processing\n");
+            // Supprime tous les guillemets non entourants et expanse si nécessaire
+            tmp = remove_partial_quotes(args[i]);
+            //printf("DEBUG: After remove_partial_quotes: '%s'\n", tmp);
+            clean_arg = expand_vars(tmp, *env, STATE_GENERAL);
+            free(tmp);
         }
 
-        // Gestion de l'espace avant l'argument
-        if (print_space && clean_arg[0] != '\0')
+        //printf("DEBUG: Final clean_arg: '%s'\n", clean_arg ? clean_arg : "NULL");
+
+        if (print_space && clean_arg && clean_arg[0] != '\0')
             printf(" ");
-        
-        printf("%s", clean_arg);
-        
-        // Détermine si on doit imprimer un espace pour le prochain argument
+        if (clean_arg && clean_arg[0] != '\0')
+            printf("%s", clean_arg);
+
         print_space = 1;
-        if (args[i + 1] && 
-            ((args[i][0] == '\'' || args[i][0] == '"') && 
-            (args[i + 1][0] == '\'' || args[i + 1][0] == '"')))
-        {
-            // Cas de concaténation comme hello'world' ou hello""world
+        if (args[i + 1] && clean_arg && clean_arg[0] != '\0' &&
+            (args[i][0] == '\'' || args[i][0] == '"') &&
+            (args[i + 1][0] == '\'' || args[i + 1][0] == '"'))
             print_space = 0;
-        }
 
         free(clean_arg);
         i++;
@@ -153,7 +167,7 @@ int builtin_echo(char **args, char ***env)
 
     if (!n_option)
         printf("\n");
-    
+
     g_last_exit_status = 0;
     return (0);
 }
@@ -181,7 +195,7 @@ int builtin_cd(char **args, char ***env)
         path = get_env_value("HOME", *env); // Aller à HOME si pas d'args
     else
     {
-        path = expand_vars(args[1], *env); // Expanser $PWD
+        path = expand_vars(args[1], *env, STATE_GENERAL); // Expanser $PWD
         if (!path)
             path = ft_strdup(args[1]);
     }

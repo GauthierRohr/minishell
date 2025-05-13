@@ -1,14 +1,14 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   builtins_set2.c                                    :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: grohr <grohr@student.42.fr>                +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/04/23 22:28:19 by grohr             #+#    #+#             */
-/*   Updated: 2025/05/13 15:53:37 by grohr            ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
+/* ************************************************************************** /
+/                                                                            /
+/                                                        :::      ::::::::   /
+/   builtins_set2.c                                    :+:      :+:    :+:   /
+/                                                    +:+ +:+         +:+     /
+/   By: grohr grohr@student.42.fr                +#+  +:+       +#+        /
+/                                                +#+#+#+#+#+   +#+           /
+/   Created: 2025/04/23 22:28:19 by grohr             #+#    #+#             /
+/   Updated: 2025/05/13 18:45:00 by grohr            ###   ########.fr       /
+/                                                                            /
+/ ************************************************************************** */
 
 #include "../inc/minishell.h"
 
@@ -25,7 +25,7 @@ int find_env_var(char **env, const char *var)
     while (env[i])
     {
         if (ft_strncmp(env[i], var, len) == 0 && env[i][len] == '=')
-            return (i);
+        return (i);
         i++;
     }
     return (-1);
@@ -36,7 +36,7 @@ static int is_user_defined_var(const char *var)
 {
     // Liste des variables système à conserver
     const char *system_vars[] =
-	{
+    {
         "PATH", "HOME", "USER", "SHELL", "PWD",
         "OLDPWD", "SHLVL", "_", "TERM", "LANG",
         "MallocNanoZone", "SECURITYSESSIONID", "COMMAND_MODE",
@@ -50,15 +50,15 @@ static int is_user_defined_var(const char *var)
         "ZDOTDIR", "USER_ZDOTDIR", "VSCODE_PROFILE_INITIALIZED",
         NULL
     };
-    
+
     char *name;
     int i = 0;
-    
+
     // Extraire le nom de la variable (avant le '=')
     name = ft_substr(var, 0, ft_strchr(var, '=') - var);
     if (!name)
-        return (0);
-    
+    return (0);
+
     // Vérifier si c'est une variable système
     while (system_vars[i])
     {
@@ -81,28 +81,28 @@ int builtin_unset(char **args, char ***env)
 
     if (!args[1])
     {
-        // Sans arguments, supprimer toutes les variables utilisateur
-        i = 0;
-        while ((*env)[i])
+    // Sans arguments, supprimer toutes les variables utilisateur
+    i = 0;
+    while ((*env)[i])
+    {
+        if (is_user_defined_var((*env)[i]))
         {
-            if (is_user_defined_var((*env)[i]))
+            free((*env)[i]);
+            env_index = i;
+            while ((*env)[env_index + 1])
             {
-                free((*env)[i]);
-                env_index = i;
-                while ((*env)[env_index + 1])
-                {
-                    (*env)[env_index] = (*env)[env_index + 1];
-                    env_index++;
-                }
-                (*env)[env_index] = NULL;
+                (*env)[env_index] = (*env)[env_index + 1];
+                env_index++;
             }
-            else
-            {
-                i++;
-            }
+            (*env)[env_index] = NULL;
         }
-        g_last_exit_status = 0;
-        return (0);
+        else
+        {
+            i++;
+        }
+    }  
+    g_last_exit_status = 0;
+    return (0);
     }
 
     // Avec arguments, supprimer les variables spécifiées
@@ -130,7 +130,7 @@ int builtin_unset(char **args, char ***env)
 int builtin_env(char **env)
 {
     int i;
-
+    
     i = 0;
     while (env[i])
     {
@@ -142,73 +142,123 @@ int builtin_env(char **env)
 }
 
 /* Convertit une chaîne en long, gérant les signes + et -. Stocke le pointeur
- * de fin dans endptr. Retourne le résultat ou 0 si erreur non numérique. */
-int ft_atoi(const char *str)
-{
-    int result = 0;
+
+    de fin dans endptr. Retourne le résultat ou LONG_MAX/MIN si erreur. */
+    long ft_strtol(const char *str, char **endptr, int base)
+    {
+    long result = 0;
     int sign = 1;
     int i = 0;
 
-    // Skip leading whitespace
+    // Ignorer les espaces initiaux
     while (str[i] == ' ' || (str[i] >= '\t' && str[i] <= '\r'))
-        i++;
-    // Handle sign
+    i++;
+
+    // Gérer le signe
     if (str[i] == '+' || str[i] == '-')
     {
-        if (str[i] == '-')
-            sign = -1;
-        i++;
+    if (str[i] == '-')
+    sign = -1;
+    i++;
     }
-    // Convert number
-    while (str[i] >= '0' && str[i] <= '9')
-    {
-        if (result > (INT_MAX - (str[i] - '0')) / 10) // Prevent overflow
-            return (sign == 1) ? INT_MAX : INT_MIN;
 
-        result = result * 10 + (str[i] - '0');
-        i++;
+    // Vérifier que la base est 10 et qu'on a un chiffre
+    if (base != 10 || !ft_isdigit(str[i]))
+    {
+    if (endptr)
+    *endptr = (char *)str + i;
+    return (0);
     }
-    return result * sign;
-}
+
+    // Convertir les chiffres
+    while (ft_isdigit(str[i]))
+    {
+    // Vérifier l'overflow
+    if (result > (LONG_MAX - (str[i] - '0')) / 10)
+    {
+    if (endptr)
+    *endptr = (char *)str + i;
+    return (sign == 1) ? LONG_MAX : LONG_MIN;
+    }
+    result = result * 10 + (str[i] - '0');
+    i++;
+    }
+
+    if (endptr)
+    *endptr = (char *)str + i;
+    return (result * sign);
+    }
+
 // Gère la commande exit
 int builtin_exit(char **args, char ***env)
 {
-    int code;
-    char *arg;
-    
-    (void)env; // Ignore env
-    ft_putstr_fd("exit\n", 1);
-    if (!args[1])
-        exit(g_last_exit_status);
-    if (args[2])
-    {
-        ft_putstr_fd("exit: too many arguments\n", 2);
-        g_last_exit_status = 1;
-        return (1);
-    }
-    // Handle quotes around the argument
-    arg = remove_quotes(args[1]);
-    if (!arg)
-        arg = ft_strdup(args[1]);
-    // Check if the argument is a valid number
-    for (int i = 0; arg[i]; i++)
-    {
-        if ((arg[i] < '0' || arg[i] > '9') && arg[i] != '-' && arg[i] != '+')
-        {
-            ft_putstr_fd("exit: ", 2);
-            ft_putstr_fd(args[1], 2);
-            ft_putstr_fd(": numeric argument required\n", 2);
-            free(arg);
-            exit(2);
-        }
-    }
-    code = ft_atoi(arg);
-    free(arg);
-    // Adjust exit code to match Bash behavior
-    if (code > 255)
-        code = code % 256;
-    else if (code < 0)
-        exit(156);
-    g_last_exit_status = code;
-    exit(code);
+long code;
+char *endptr;
+char *arg;
+
+(void)env; // Ignorer env
+ft_putstr_fd("exit\n", 1);
+if (!args[1])
+exit(g_last_exit_status);
+if (args[2])
+{
+ft_putstr_fd("exit: too many arguments\n", 2);
+g_last_exit_status = 1;
+return (1);
+}
+
+// Gérer les quotes autour de l'argument
+arg = remove_quotes(args[1]);
+if (!arg)
+arg = ft_strdup(args[1]);
+
+// Supprimer les espaces initiaux
+while (*arg == ' ' || (*arg >= '\t' && *arg <= '\r'))
+arg++;
+
+// Vérifier si l'argument est vide
+if (arg[0] == '\0')
+{
+ft_putstr_fd("exit: ", 2);
+ft_putstr_fd(args[1], 2);
+ft_putstr_fd(": numeric argument required\n", 2);
+free(arg);
+exit(2);
+}
+
+// Gérer les cas comme +"100" ou -"100"
+if (arg[0] == '+' || arg[0] == '-')
+{
+if (!ft_isdigit(arg[1])) // Cas comme "+" ou "-"
+{
+ft_putstr_fd("exit: ", 2);
+ft_putstr_fd(args[1], 2);
+ft_putstr_fd(": numeric argument required\n", 2);
+free(arg);
+exit(2);
+}
+}
+
+code = ft_strtol(arg, &endptr, 10);
+// Ignorer les espaces finaux
+while (*endptr == ' ' || (*endptr >= '\t' && *endptr <= '\r'))
+endptr++;
+if (*endptr != '\0')
+{
+ft_putstr_fd("exit: ", 2);
+ft_putstr_fd(args[1], 2);
+ft_putstr_fd(": numeric argument required\n", 2);
+free(arg);
+exit(2);
+}
+
+free(arg);
+
+// Ajuster le code de sortie modulo 256 (bash behavior)
+code = code % 256;
+if (code < 0)
+code += 256; // Gérer les codes négatifs
+
+g_last_exit_status = (int)code;
+exit(g_last_exit_status);
 }

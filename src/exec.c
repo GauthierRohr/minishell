@@ -6,7 +6,7 @@
 /*   By: grohr <grohr@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/23 22:29:03 by grohr             #+#    #+#             */
-/*   Updated: 2025/05/13 16:36:29 by grohr            ###   ########.fr       */
+/*   Updated: 2025/05/13 18:30:09 by grohr            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,6 @@ char *remove_quotes(const char *str)
     i = 0;
     j = 0;
     
-    // Vérifie si la chaîne est entourée de quotes
     if ((len >= 2) && 
         ((str[0] == '\'' && str[len - 1] == '\'') || 
          (str[0] == '"' && str[len - 1] == '"')))
@@ -55,7 +54,6 @@ char *remove_quotes(const char *str)
     }
     else
     {
-        // Pas de quotes à enlever, copie toute la chaîne
         while (str[i])
         {
             result[j++] = str[i++];
@@ -63,9 +61,42 @@ char *remove_quotes(const char *str)
     }
     
     result[j] = '\0';
+    //printf("DEBUG: remove_quotes('%s') -> '%s'\n", str, result);
     return (result);
 }
 
+char *remove_partial_quotes(const char *str)
+{
+    char *result = malloc(strlen(str) + 1);
+    int i = 0, j = 0;
+    t_state state = STATE_GENERAL;
+
+    if (!result)
+        return (NULL);
+
+    while (str[i])
+    {
+        if (state == STATE_GENERAL && (str[i] == '\'' || str[i] == '"'))
+        {
+            if (str[i] == '\'')
+                state = STATE_IN_SINGLE_QUOTE;
+            else
+                state = STATE_IN_DOUBLE_QUOTE;
+            i++;
+            continue;
+        }
+        else if ((state == STATE_IN_SINGLE_QUOTE && str[i] == '\'') ||
+                 (state == STATE_IN_DOUBLE_QUOTE && str[i] == '"'))
+        {
+            state = STATE_GENERAL;
+            i++;
+            continue;
+        }
+        result[j++] = str[i++];
+    }
+    result[j] = '\0';
+    return (result);
+}
 
 // Exécute une commande externe via fork + execvp
 int execute_external(char **args, char **envp)

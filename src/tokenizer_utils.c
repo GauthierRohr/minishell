@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   tokenizer_utils.c                                  :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: grohr <grohr@student.42.fr>                +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/05/13 17:29:58 by grohr             #+#    #+#             */
+/*   Updated: 2025/05/13 18:22:36 by grohr            ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "../inc/tokenizer.h"
 #include "../inc/minishell.h"
 #include <stdlib.h>
@@ -25,24 +37,23 @@ char	*extract_token(const char *input, int start, int end)
 }
 
 // Ajoute dynamiquement un nouveau token à la liste existante de tokens
-int	add_token(char ***tokens, int *size, char *token)
+int add_token(char ***tokens, int *size, char *value)
 {
-	char	**new_tokens;
-	int		i;
+    char **new_tokens;
+    int i;
 
-	new_tokens = malloc(sizeof(char *) * (*size + 2));
-	if (!new_tokens)
-		return (0);
-	i = 0;
-	while (i < *size)
-	{
-		new_tokens[i] = (*tokens)[i];
-		i++;
-	}
-	new_tokens[i++] = token;
-	new_tokens[i] = NULL;
-	free(*tokens);
-	*tokens = new_tokens;
-	(*size)++;
-	return (1);
+    new_tokens = malloc(sizeof(char *) * (*size + 2));
+    if (!new_tokens)
+    {
+        free(value);
+        return (0);
+    }
+    for (i = 0; i < *size; i++)
+        new_tokens[i] = (*tokens)[i];
+    new_tokens[i] = value;
+    new_tokens[i + 1] = NULL;
+    free(*tokens);
+    *tokens = new_tokens;
+    (*size)++;
+    return (1);
 }

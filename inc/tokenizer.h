@@ -18,6 +18,6 @@ char 	**tokenize_input(const char *input, int size, int i);
 // tokenizer_utils.c
 int		is_special_char(char c);
 char	*extract_token(const char *input, int start, int end);
-int		add_token(char ***tokens, int *size, char *token);
+int 	add_token(char ***tokens, int *size, char *value);
 
 #endif
