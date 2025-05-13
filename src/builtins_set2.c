@@ -143,47 +143,40 @@ int builtin_env(char **env)
 
 /* Convertit une chaîne en long, gérant les signes + et -. Stocke le pointeur
  * de fin dans endptr. Retourne le résultat ou 0 si erreur non numérique. */
-long ft_strtol(const char *str, char **endptr, int base)
+int ft_atoi(const char *str)
 {
-    long result;
-    int sign;
-    int i;
+    int result = 0;
+    int sign = 1;
+    int i = 0;
 
-    result = 0;
-    sign = 1;
-    i = 0;
+    // Skip leading whitespace
     while (str[i] == ' ' || (str[i] >= '\t' && str[i] <= '\r'))
         i++;
+    // Handle sign
     if (str[i] == '+' || str[i] == '-')
     {
         if (str[i] == '-')
             sign = -1;
         i++;
     }
-    if (base != 10 || !ft_isdigit(str[i]))
+    // Convert number
+    while (str[i] >= '0' && str[i] <= '9')
     {
-        if (endptr)
-            *endptr = (char *)str + i;
-        return (0);
-    }
-    while (ft_isdigit(str[i]))
-    {
+        if (result > (INT_MAX - (str[i] - '0')) / 10) // Prevent overflow
+            return (sign == 1) ? INT_MAX : INT_MIN;
+
         result = result * 10 + (str[i] - '0');
         i++;
     }
-    if (endptr)
-        *endptr = (char *)str + i;
-    return (result * sign);
+    return result * sign;
 }
-
 // Gère la commande exit
 int builtin_exit(char **args, char ***env)
 {
-    long code;
-    char *endptr;
+    int code;
     char *arg;
-
-    (void)env; // Ignorer env
+    
+    (void)env; // Ignore env
     ft_putstr_fd("exit\n", 1);
     if (!args[1])
         exit(g_last_exit_status);
@@ -193,21 +186,29 @@ int builtin_exit(char **args, char ***env)
         g_last_exit_status = 1;
         return (1);
     }
-    // Gérer les quotes autour de l'argument
+    // Handle quotes around the argument
     arg = remove_quotes(args[1]);
     if (!arg)
         arg = ft_strdup(args[1]);
-    code = ft_strtol(arg, &endptr, 10);
-    free(arg);
-    if (*endptr != '\0')
+    // Check if the argument is a valid number
+    for (int i = 0; arg[i]; i++)
     {
-        ft_putstr_fd("exit: ", 2);
-        ft_putstr_fd(args[1], 2);
-        ft_putstr_fd(": numeric argument required\n", 2);
-        exit(2);
+        if ((arg[i] < '0' || arg[i] > '9') && arg[i] != '-' && arg[i] != '+')
+        {
+            ft_putstr_fd("exit: ", 2);
+            ft_putstr_fd(args[1], 2);
+            ft_putstr_fd(": numeric argument required\n", 2);
+            free(arg);
+            exit(2);
+        }
     }
-    if (code > INT_MAX || code < INT_MIN)
-        code = code % 256; // Bash ajuste les codes
-    g_last_exit_status = (int)code;
-    exit(g_last_exit_status);
+    code = ft_atoi(arg);
+    free(arg);
+    // Adjust exit code to match Bash behavior
+    if (code > 255)
+        code = code % 256;
+    else if (code < 0)
+        exit(156);
+    g_last_exit_status = code;
+    exit(code);
 }
