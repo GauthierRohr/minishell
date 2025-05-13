@@ -12,8 +12,8 @@ typedef enum s_state
 }	t_state;
 
 // tokenizer.c
-int extract_quoted_token(const char *input, int *i, char quote, char ***tokens, int *size);
-char	**tokenize_input(const char *input, int size, int i, int start);
+int 	extract_quoted_token(const char *input, int *i, char quote, char ***tokens, int *size);
+char 	**tokenize_input(const char *input, int size, int i);
 
 // tokenizer_utils.c
 int		is_special_char(char c);

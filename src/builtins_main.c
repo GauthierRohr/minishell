@@ -6,7 +6,7 @@
 /*   By: grohr <grohr@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/23 21:48:34 by grohr             #+#    #+#             */
-/*   Updated: 2025/05/11 13:16:56 by grohr            ###   ########.fr       */
+/*   Updated: 2025/05/13 15:54:22 by grohr            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,6 +56,6 @@ int execute_builtin(char **args, char ***env)
     else if (ft_strcmp(args[0], "env") == 0)
         return (builtin_env(*env));
     else if (ft_strcmp(args[0], "exit") == 0)
-        return (builtin_exit(args));
+        return (builtin_exit(args, env));
     return (1);
 }

@@ -20,7 +20,6 @@ SRCS =	src/builtins_main.c \
 		src/signals.c \
 		src/tokenizer.c \
 		src/tokenizer_utils.c \
-		src/utils.c	\
 		src/piping.c
 
 OBJS = $(SRCS:src/%.c=$(OBJ_DIR)/%.o)

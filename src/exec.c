@@ -6,7 +6,7 @@
 /*   By: grohr <grohr@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/23 22:29:03 by grohr             #+#    #+#             */
-/*   Updated: 2025/05/11 13:12:11 by grohr            ###   ########.fr       */
+/*   Updated: 2025/05/13 16:36:29 by grohr            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,30 +24,48 @@
 #include <string.h>
 
 // Supprime les ' et " d'un token, pour afficher la bonne sortie dans le terminal
-char	*remove_quotes(const char *str)
+char *remove_quotes(const char *str)
 {
-	int		i;
-	int		j;
-	char	*result;
+    char *result;
+    int len;
+    int i;
+    int j;
 
-	if (!str)
-		return (NULL);
-	
-	result = malloc(ft_strlen(str) + 1);
-	if (!result)
-		return (NULL);
-	
-	i = 0;
-	j = 0;
-	while (str[i])
-	{
-		if (str[i] != '\"' && str[i] != '\'')
-			result[j++] = str[i];
-		i++;
-	}
-	result[j] = '\0';
-	return (result);
+    if (!str)
+        return (NULL);
+    
+    len = ft_strlen(str);
+    result = malloc(len + 1);
+    if (!result)
+        return (NULL);
+    
+    i = 0;
+    j = 0;
+    
+    // Vérifie si la chaîne est entourée de quotes
+    if ((len >= 2) && 
+        ((str[0] == '\'' && str[len - 1] == '\'') || 
+         (str[0] == '"' && str[len - 1] == '"')))
+    {
+        i = 1;
+        while (i < len - 1)
+        {
+            result[j++] = str[i++];
+        }
+    }
+    else
+    {
+        // Pas de quotes à enlever, copie toute la chaîne
+        while (str[i])
+        {
+            result[j++] = str[i++];
+        }
+    }
+    
+    result[j] = '\0';
+    return (result);
 }
+
 
 // Exécute une commande externe via fork + execvp
 int execute_external(char **args, char **envp)

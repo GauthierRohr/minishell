@@ -6,7 +6,7 @@
 /*   By: grohr <grohr@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/23 22:28:10 by grohr             #+#    #+#             */
-/*   Updated: 2025/05/11 13:17:22 by grohr            ###   ########.fr       */
+/*   Updated: 2025/05/13 15:45:13 by grohr            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,7 @@
 # include "signals.h"
 # include "tokenizer.h"
 # include "piping.h"
+# include "limits.h"
 
 #define RED     "\033[1;31m"
 #define GREEN   "\033[1;32m"

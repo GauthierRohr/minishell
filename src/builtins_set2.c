@@ -6,7 +6,7 @@
 /*   By: grohr <grohr@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/23 22:28:19 by grohr             #+#    #+#             */
-/*   Updated: 2025/05/11 13:09:48 by grohr            ###   ########.fr       */
+/*   Updated: 2025/05/13 15:53:37 by grohr            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,21 +78,41 @@ int builtin_unset(char **args, char ***env)
 {
     int i;
     int env_index;
-    
-    if (args[1])
+
+    if (!args[1])
     {
-        ft_putstr_fd("minishell: unset: this shell only supports 'unset' without args\n", 2);
-        g_last_exit_status = 1;
-        return (1);
-    }
-    
-    i = 0;
-    while ((*env)[i])
-    {
-        if (is_user_defined_var((*env)[i]))
+        // Sans arguments, supprimer toutes les variables utilisateur
+        i = 0;
+        while ((*env)[i])
         {
-            free((*env)[i]);
-            env_index = i;
+            if (is_user_defined_var((*env)[i]))
+            {
+                free((*env)[i]);
+                env_index = i;
+                while ((*env)[env_index + 1])
+                {
+                    (*env)[env_index] = (*env)[env_index + 1];
+                    env_index++;
+                }
+                (*env)[env_index] = NULL;
+            }
+            else
+            {
+                i++;
+            }
+        }
+        g_last_exit_status = 0;
+        return (0);
+    }
+
+    // Avec arguments, supprimer les variables spécifiées
+    i = 1;
+    while (args[i])
+    {
+        env_index = find_env_var(*env, args[i]);
+        if (env_index != -1 && is_user_defined_var((*env)[env_index]))
+        {
+            free((*env)[env_index]);
             while ((*env)[env_index + 1])
             {
                 (*env)[env_index] = (*env)[env_index + 1];
@@ -100,10 +120,7 @@ int builtin_unset(char **args, char ***env)
             }
             (*env)[env_index] = NULL;
         }
-        else
-        {
-            i++;
-        }
+        i++;
     }
     g_last_exit_status = 0;
     return (0);
@@ -124,16 +141,73 @@ int builtin_env(char **env)
     return (0);
 }
 
-// Gère la commande exit
-int builtin_exit(char **args)
+/* Convertit une chaîne en long, gérant les signes + et -. Stocke le pointeur
+ * de fin dans endptr. Retourne le résultat ou 0 si erreur non numérique. */
+long ft_strtol(const char *str, char **endptr, int base)
 {
-    printf("exit\n");
-    if (!args[1])
+    long result;
+    int sign;
+    int i;
+
+    result = 0;
+    sign = 1;
+    i = 0;
+    while (str[i] == ' ' || (str[i] >= '\t' && str[i] <= '\r'))
+        i++;
+    if (str[i] == '+' || str[i] == '-')
     {
-        g_last_exit_status = 0;
-        exit(0);
+        if (str[i] == '-')
+            sign = -1;
+        i++;
     }
-    g_last_exit_status = ft_atoi(args[1]);
+    if (base != 10 || !ft_isdigit(str[i]))
+    {
+        if (endptr)
+            *endptr = (char *)str + i;
+        return (0);
+    }
+    while (ft_isdigit(str[i]))
+    {
+        result = result * 10 + (str[i] - '0');
+        i++;
+    }
+    if (endptr)
+        *endptr = (char *)str + i;
+    return (result * sign);
+}
+
+// Gère la commande exit
+int builtin_exit(char **args, char ***env)
+{
+    long code;
+    char *endptr;
+    char *arg;
+
+    (void)env; // Ignorer env
+    ft_putstr_fd("exit\n", 1);
+    if (!args[1])
+        exit(g_last_exit_status);
+    if (args[2])
+    {
+        ft_putstr_fd("exit: too many arguments\n", 2);
+        g_last_exit_status = 1;
+        return (1);
+    }
+    // Gérer les quotes autour de l'argument
+    arg = remove_quotes(args[1]);
+    if (!arg)
+        arg = ft_strdup(args[1]);
+    code = ft_strtol(arg, &endptr, 10);
+    free(arg);
+    if (*endptr != '\0')
+    {
+        ft_putstr_fd("exit: ", 2);
+        ft_putstr_fd(args[1], 2);
+        ft_putstr_fd(": numeric argument required\n", 2);
+        exit(2);
+    }
+    if (code > INT_MAX || code < INT_MIN)
+        code = code % 256; // Bash ajuste les codes
+    g_last_exit_status = (int)code;
     exit(g_last_exit_status);
-    return (0);
 }

@@ -16,6 +16,6 @@ int	builtin_export(char **args, char ***env);
 int	find_env_var(char **env, const char *var);
 int	builtin_unset(char **args, char ***env);
 int	builtin_env(char **env);
-int	builtin_exit(char **args);
+int builtin_exit(char **args, char ***env);
 
 #endif

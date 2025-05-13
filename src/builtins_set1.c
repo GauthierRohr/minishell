@@ -6,7 +6,7 @@
 /*   By: grohr <grohr@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/23 22:28:08 by grohr             #+#    #+#             */
-/*   Updated: 2025/05/11 13:04:08 by grohr            ###   ########.fr       */
+/*   Updated: 2025/05/13 16:32:32 by grohr            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -94,37 +94,66 @@ char *expand_vars(const char *token, char **env)
     return (expanded);
 }
 
-// Gère la commande echo avec option -n
-// 
-// return 0 en cas de succès
-//
 int builtin_echo(char **args, char ***env)
 {
-    int i;
-    int n_option;
+    int i = 1;
+    int n_option = 0;
     char *clean_arg;
+    char *tmp;
+    int print_space = 0;
 
-    n_option = 0;
-    i = 1;
+    // Gestion de l'option -n
     if (args[1] && ft_strcmp(args[1], "-n") == 0)
     {
         n_option = 1;
         i = 2;
     }
+
     while (args[i])
     {
-        char *tmp = expand_vars(args[i], *env);
-        clean_arg = remove_quotes(tmp);
-        free(tmp);                              
-        printf("%s", clean_arg);
-        free(clean_arg);
-        
-        if (args[i + 1])
+        // Gestion des quotes et expansion
+        if (args[i][0] == '\'')
+        {
+            // Single quotes - pas d'expansion, enlever les quotes
+            tmp = remove_quotes(args[i]);
+            clean_arg = tmp;
+        }
+        else if (args[i][0] == '"')
+        {
+            // Double quotes - expansion des variables, enlever les quotes
+            tmp = remove_quotes(args[i]);
+            clean_arg = expand_vars(tmp, *env);
+            free(tmp);
+        }
+        else
+        {
+            // Pas de quotes - expansion des variables
+            clean_arg = expand_vars(args[i], *env);
+        }
+
+        // Gestion de l'espace avant l'argument
+        if (print_space && clean_arg[0] != '\0')
             printf(" ");
+        
+        printf("%s", clean_arg);
+        
+        // Détermine si on doit imprimer un espace pour le prochain argument
+        print_space = 1;
+        if (args[i + 1] && 
+            ((args[i][0] == '\'' || args[i][0] == '"') && 
+            (args[i + 1][0] == '\'' || args[i + 1][0] == '"')))
+        {
+            // Cas de concaténation comme hello'world' ou hello""world
+            print_space = 0;
+        }
+
+        free(clean_arg);
         i++;
     }
+
     if (!n_option)
         printf("\n");
+    
     g_last_exit_status = 0;
     return (0);
 }
@@ -145,38 +174,42 @@ int builtin_echo(char **args, char ***env)
 //
 int builtin_cd(char **args, char ***env)
 {
-    char    *home_path;
-    char    current_dir[1024];
-    char    *target_dir;
+    char *path;
+    int ret;
 
-    (void)env;
     if (!args[1])
+        path = get_env_value("HOME", *env); // Aller à HOME si pas d'args
+    else
     {
-        home_path = getenv("HOME");
-        if (!home_path)
-        {
-            ft_putstr_fd("minishell: cd: HOME not set\n", 2);
-            g_last_exit_status = 1;
-            return (1);
-        }
-        target_dir = home_path;
+        path = expand_vars(args[1], *env); // Expanser $PWD
+        if (!path)
+            path = ft_strdup(args[1]);
+    }
+    if (!path)
+    {
+        ft_putstr_fd("cd: memory error\n", 2);
+        g_last_exit_status = 1;
+        return (1);
+    }
+    if (args[2])
+    {
+        ft_putstr_fd("cd: too many arguments\n", 2);
+        free(path);
+        g_last_exit_status = 1;
+        return (1);
+    }
+    ret = chdir(path);
+    if (ret == -1)
+    {
+        ft_putstr_fd("cd: ", 2);
+        ft_putstr_fd(path, 2);
+        ft_putstr_fd(": No such file or directory\n", 2);
+        g_last_exit_status = 1;
     }
     else
-        target_dir = args[1];
-    if (getcwd(current_dir, sizeof(current_dir)) == NULL)
-    {
-        perror("minishell: cd: getcwd error");
-        g_last_exit_status = 1;
-        return (1);
-    }
-    if (chdir(target_dir) != 0)
-    {
-        perror("minishell: cd");
-        g_last_exit_status = 1;
-        return (1);
-    }
-    g_last_exit_status = 0;
-    return (0);
+        g_last_exit_status = 0;
+    free(path);
+    return (g_last_exit_status);
 }
  
 // Gère la commande pwd pour afficher le répertoire courant
@@ -214,6 +247,21 @@ int	count_array(char **array)
 	return (i);
 }
 
+// Fonction pour valider les noms de variables
+static int is_valid_identifier(const char *name)
+{
+    int i = 0;
+    if (!name || !name[0] || (!ft_isalpha(name[0]) && name[0] != '_'))
+        return (0);
+    while (name[i])
+    {
+        if (!ft_isalnum(name[i]) && name[i] != '_')
+            return (0);
+        i++;
+    }
+    return (1);
+}
+
 // Gère la commande export pour définir des variables d'environnement
 //
 // return 0 en cas de succès, 1 en cas d'erreur
@@ -225,6 +273,7 @@ int builtin_export(char **args, char ***env)
     char **new_env;
     int env_size;
     char *equal_sign;
+    char *var_name;
 
     if (!args[1])
     {
@@ -242,8 +291,20 @@ int builtin_export(char **args, char ***env)
     while (args[i])
     {
         equal_sign = ft_strchr(args[i], '=');
-        if (equal_sign)
+        if (equal_sign || !args[i][0]) // Gérer le cas où la chaîne est vide
         {
+            var_name = equal_sign ? ft_substr(args[i], 0, equal_sign - args[i]) : ft_strdup(args[i]);
+            if (!var_name || !is_valid_identifier(var_name))
+            {
+                ft_putstr_fd("export: `", 2);
+                ft_putstr_fd(args[i], 2);
+                ft_putstr_fd("': not a valid identifier\n", 2);
+                free(var_name);
+                g_last_exit_status = 1;
+                i++;
+                continue;
+            }
+            free(var_name);
             *equal_sign = '\0';
             env_index = find_env_var(*env, args[i]);
             *equal_sign = '=';
@@ -282,8 +343,16 @@ int builtin_export(char **args, char ***env)
                 *env = new_env;
             }
         }
+        else if (!is_valid_identifier(args[i]))
+        {
+            ft_putstr_fd("export: `", 2);
+            ft_putstr_fd(args[i], 2);
+            ft_putstr_fd("': not a valid identifier\n", 2);
+            g_last_exit_status = 1;
+            i++;
+            continue;
+        }
         i++;
     }
-    g_last_exit_status = 0;
-    return (0);
+    return (g_last_exit_status);
 }

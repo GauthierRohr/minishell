@@ -40,7 +40,7 @@ static void	update_state_quote(t_state *state, char c)
 		*state = STATE_GENERAL;
 }
 
-// Gère les espaces : coupe un token quand un espace est détecté (hors guillemets)
+/* // Gère les espaces : coupe un token quand un espace est détecté (hors guillemets)
 static int	handle_space_token(const char *input, int *i, int *start,
 	char ***tokens, int *size)
 {
@@ -96,47 +96,81 @@ static int	handle_special_token(const char *input, int *i, int *start,
 	*start = *i;
 	return (1);
 }
+ */
 
 // Fonction principale : découpe l'input en tokens en gérant quotes et caractères spéciaux
-char	**tokenize_input(const char *input, int size, int i, int start)
+char **tokenize_input(const char *input, int size, int i)
 {
 	char	**tokens = NULL;
 	t_state	state = STATE_GENERAL;
+	char	*current = malloc(strlen(input) + 1); // tampon pour construire le token
+	int		curr_i = 0;
 
+	if (!current)
+		return (NULL);
 	while (input[i])
 	{
-		if (state == STATE_GENERAL)
-		{
-			if (is_special_char(input[i]))
-			{
-				if (!handle_special_token(input, &i, &start, &tokens, &size))
-					return (NULL);
-				continue;
-			}
-			else if (input[i] == ' ')
-			{
-				if (!handle_space_token(input, &i, &start, &tokens, &size))
-					return (NULL);
-				continue;
-			}
-			else if (input[i] == '\'' || input[i] == '\"')
-			{
-				if (start < i)
-				{
-					char *pre_token = extract_token(input, start, i);
-					if (!add_token(&tokens, &size, pre_token))
-						return (NULL);
-				}
-				if (!extract_quoted_token(input, &i, input[i], &tokens, &size))
-					return (NULL);
-				start = i;
-				continue;
-			}
-		}
 		update_state_quote(&state, input[i]);
-		i++;
+		if (state == STATE_GENERAL && input[i] == ' ')
+		{
+			if (curr_i > 0)
+			{
+				current[curr_i] = '\0';
+				if (!add_token(&tokens, &size, strdup(current)))
+					return (free(current), NULL);
+				curr_i = 0;
+			}
+			i++;
+			continue;
+		}
+		else if (state == STATE_GENERAL && is_special_char(input[i]))
+		{
+			if (curr_i > 0)
+			{
+				current[curr_i] = '\0';
+				if (!add_token(&tokens, &size, strdup(current)))
+					return (free(current), NULL);
+				curr_i = 0;
+			}
+			if ((input[i] == '<' && input[i + 1] == '<') ||
+				(input[i] == '>' && input[i + 1] == '>'))
+			{
+				current[0] = input[i];
+				current[1] = input[i + 1];
+				current[2] = '\0';
+				if (!add_token(&tokens, &size, strdup(current)))
+					return (free(current), NULL);
+				i += 2;
+			}
+			else
+			{
+				current[0] = input[i++];
+				current[1] = '\0';
+				if (!add_token(&tokens, &size, strdup(current)))
+					return (free(current), NULL);
+			}
+			continue;
+		}
+		else if ((state == STATE_GENERAL && (input[i] == '\'' || input[i] == '"')) ||
+				state == STATE_IN_SINGLE_QUOTE || state == STATE_IN_DOUBLE_QUOTE)
+		{
+			char quote = input[i++];
+			while (input[i] && input[i] != quote)
+				current[curr_i++] = input[i++];
+			if (input[i] == quote)
+				i++;
+			update_state_quote(&state, quote);
+		}
+		else
+			current[curr_i++] = input[i++];
 	}
-	if (!finalize_last_token(input, start, i, &tokens, &size))
-		return (NULL);
+	if (curr_i > 0)
+	{
+		current[curr_i] = '\0';
+		if (!add_token(&tokens, &size, strdup(current)))
+			return (free(current), NULL);
+	}
+	free(current);
 	return (tokens);
 }
+

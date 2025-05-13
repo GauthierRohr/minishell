@@ -88,7 +88,7 @@ int	main(int argc, char **argv, char **envp)
 
 		// ==== ✳️ GESTION DES BUILTINS ET COMMANDES ✳️ ====
 		// ➤ Parsing de l'input :
-		args = tokenize_input(user_input, 0, 0, 0);
+		args = tokenize_input(user_input, 0, 0);
 		if (!args)
 		{
 			free(user_input);
