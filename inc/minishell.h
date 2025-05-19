@@ -6,7 +6,7 @@
 /*   By: grohr <grohr@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/23 22:28:10 by grohr             #+#    #+#             */
-/*   Updated: 2025/05/13 15:45:13 by grohr            ###   ########.fr       */
+/*   Updated: 2025/05/19 18:37:20 by grohr            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@
 # include "builtins.h"
 # include "env.h"
 # include "exec.h"
+# include "main.h"
 # include "redirect.h"
 # include "signals.h"
 # include "tokenizer.h"
