@@ -28,40 +28,40 @@ char *remove_quotes(const char *str)
 {
     char *result;
     int len;
-    int i;
-    int j;
+    int i, j;
+    int start = 0;
 
     if (!str)
         return (NULL);
-    
     len = ft_strlen(str);
     result = malloc(len + 1);
     if (!result)
         return (NULL);
-    
-    i = 0;
-    j = 0;
-    
-    if ((len >= 2) && 
-        ((str[0] == '\'' && str[len - 1] == '\'') || 
-         (str[0] == '"' && str[len - 1] == '"')))
+    // Preserve leading + or -
+    if (len >= 3 && (str[0] == '+' || str[0] == '-') &&
+        ((str[1] == '"' && str[len - 1] == '"') || (str[1] == '\'' && str[len - 1] == '\'')))
     {
-        i = 1;
-        while (i < len - 1)
-        {
-            result[j++] = str[i++];
-        }
+        result[start++] = str[0]; // Keep + or -
+        i = 2;  // Skip leading quote
+        len -= 1;  // Ignore closing quote
+    }
+    else if (len >= 2 &&
+        ((str[0] == '"' && str[len - 1] == '"') || (str[0] == '\'' && str[len - 1] == '\'')))
+    {
+        i = 1;  // Skip leading quote
+        len -= 1;  // Ignore closing quote
     }
     else
     {
-        while (str[i])
-        {
-            result[j++] = str[i++];
-        }
+        i = 0;  // No quotes to remove
     }
-    
+    // Copy remaining characters
+    j = start;
+    while (i < len)
+    {
+        result[j++] = str[i++];
+    }
     result[j] = '\0';
-    //printf("DEBUG: remove_quotes('%s') -> '%s'\n", str, result);
     return (result);
 }
 

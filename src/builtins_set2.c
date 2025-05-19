@@ -144,8 +144,8 @@ int builtin_env(char **env)
 /* Convertit une chaîne en long, gérant les signes + et -. Stocke le pointeur
 
     de fin dans endptr. Retourne le résultat ou LONG_MAX/MIN si erreur. */
-    long ft_strtol(const char *str, char **endptr, int base)
-    {
+long ft_strtol(const char *str, char **endptr, int base)
+{
     long result = 0;
     int sign = 1;
     int i = 0;
@@ -187,7 +187,7 @@ int builtin_env(char **env)
     if (endptr)
     *endptr = (char *)str + i;
     return (result * sign);
-    }
+}
 
 // Gère la commande exit
 int builtin_exit(char **args, char ***env)
@@ -227,7 +227,7 @@ exit(2);
 }
 
 // Gérer les cas comme +"100" ou -"100"
-if (arg[0] == '+' || arg[0] == '-')
+if (arg[0] == '-')
 {
 if (!ft_isdigit(arg[1])) // Cas comme "+" ou "-"
 {
@@ -253,7 +253,6 @@ exit(2);
 }
 
 free(arg);
-
 // Ajuster le code de sortie modulo 256 (bash behavior)
 code = code % 256;
 if (code < 0)
