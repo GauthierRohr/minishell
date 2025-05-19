@@ -76,18 +76,18 @@ void find_args(char **args)
     free(cmd2);
 }
 
-
-
 void execute_piped(char **cmd1, char **cmd2)
 {
     int pipefd[2];
     pid_t pid1, pid2;
+    int status1, status2;
 
     if (pipe(pipefd) == -1)
     {
         perror("pipe");
         exit(EXIT_FAILURE);
     }
+
     // First child process (Writer)
     if ((pid1 = fork()) == -1)
     {
@@ -96,29 +96,37 @@ void execute_piped(char **cmd1, char **cmd2)
     }
     if (pid1 == 0)
     {  // Child 1
-        close(pipefd[0]);   // Close read end of the pipe
-        dup2(pipefd[1], STDOUT_FILENO); // Redirect stdout to pipe's write end
-        close(pipefd[1]);   // Close pipe write end (it's duplicated now)
-        execvp(cmd1[0], cmd1);  // Execute first command
+        close(pipefd[0]);   
+        dup2(pipefd[1], STDOUT_FILENO);
+        close(pipefd[1]);   
+        execvp(cmd1[0], cmd1);  
         perror("execvp");
         exit(EXIT_FAILURE);
     }
+
     // Second child process (Reader)
     if ((pid2 = fork()) == -1) {
         perror("fork");
         exit(EXIT_FAILURE);
     }
     if (pid2 == 0) {  // Child 2
-        close(pipefd[1]);   // Close write end of the pipe
-        dup2(pipefd[0], STDIN_FILENO); // Redirect stdin to pipe's read end
-        close(pipefd[0]);   // Close pipe read end (it's duplicated now)
-        execvp(cmd2[0], cmd2);  // Execute second command
+        close(pipefd[1]);   
+        dup2(pipefd[0], STDIN_FILENO);
+        close(pipefd[0]);   
+        execvp(cmd2[0], cmd2);  
         perror("execvp");
         exit(EXIT_FAILURE);
     }
+
     // Parent process: Close pipe ends and wait for both children
     close(pipefd[0]);
     close(pipefd[1]);
-    waitpid(pid1, NULL, 0);
-    waitpid(pid2, NULL, 0);
+    waitpid(pid1, &status1, 0);
+    waitpid(pid2, &status2, 0);
+
+    // Return the exit status of the second command (grep)
+    if (WIFEXITED(status2))
+        exit(WEXITSTATUS(status2));
+    else
+        exit(EXIT_FAILURE);
 }

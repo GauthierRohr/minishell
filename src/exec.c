@@ -98,43 +98,82 @@ char *remove_partial_quotes(const char *str)
     return (result);
 }
 
-// Exécute une commande externe via fork + execvp
+char *expand_vars(const char *token, char **env, t_state quote_state);
+
+// The execute_external function without using errno.
 int execute_external(char **args, char **envp)
 {
     pid_t pid;
     int status;
+    struct stat st;
+    int i;
+
+    // For each token:
+    // 1. Remove enclosing quotes.
+    // 2. Expand variables using STATE_GENERAL (i.e. no special quoting).
+    for (i = 0; args[i]; i++)
+    {
+        char *tmp = remove_quotes(args[i]);
+        free(args[i]);
+        args[i] = tmp;
+        
+        tmp = expand_vars(args[i], envp, STATE_GENERAL);
+        free(args[i]);
+        args[i] = tmp;
+    }
+
+    // Remove tokens that are now empty (e.g. for an unset $EMPTY).
+    args = clean_args(args);
+    if (!args || !args[0] || args[0][0] == '\0')
+    {
+        // Mimic bash: if no command remains, return success.
+        return 0;
+    }
 
     pid = fork();
-	(void)envp; // temporairement pas utilisé, a voir ce qu'on en fait
     if (pid < 0)
     {
         perror("fork");
-        g_last_exit_status = 1;
-        return (1);
+        return 1;
     }
-	if (pid == 0)
-	{
-		int i = 0;
-		while (args[i])
-		{
-			char *tmp = remove_quotes(args[i]);
-			free(args[i]);
-			args[i] = tmp;
-
-			//remove_quotes(args[i]); // Supprime quotes avant exec parce que j'avais
-			i++;							// laissé dans les tokens pour pas confondre l;exec de ' et "
-		}
-		if (execvp(args[0], args) == -1)
-		{
-			perror("execvp");
-			exit(EXIT_FAILURE);
-		}
-	}
-	else
+    else if (pid == 0)
     {
+        /* In the child process */
+        // If the command appears to be a file path (contains a slash)
+        if (strchr(args[0], '/'))
+        {
+            if (stat(args[0], &st) == 0)
+            {
+                if (S_ISDIR(st.st_mode))
+                {
+                    fprintf(stderr, "%s: Is a directory\n", args[0]);
+                    exit(PERMISSION_DENIED);
+                }
+                if (access(args[0], X_OK) != 0)
+                {
+                    fprintf(stderr, "%s: Permission denied\n", args[0]);
+                    exit(PERMISSION_DENIED);
+                }
+            }
+        }
+        // Attempt to execute the command.
+        execvp(args[0], args);
+        if (strchr(args[0], '/'))
+        {
+            fprintf(stderr, "%s: No such file or directory\n", args[0]);
+            exit(CMD_NOT_FOUND);
+        }
+        else
+        {
+            fprintf(stderr, "%s: command not found\n", args[0]);
+            exit(CMD_NOT_FOUND);
+        }
+    }
+    else
+    {
+        /* In the parent process, wait for the child to finish */
         waitpid(pid, &status, 0);
         g_last_exit_status = WEXITSTATUS(status);
-        return (g_last_exit_status);
+        return WEXITSTATUS(status);
     }
-	return (1);
 }

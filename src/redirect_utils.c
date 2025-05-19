@@ -24,36 +24,36 @@ char **clean_args(char **args)
     if (!args)
         return (NULL);
     
-    // Count non-NULL arguments
+    // Count tokens that are not empty strings.
     for (i = 0; args[i]; i++)
-        if (args[i] != NULL)
+    {
+        if (args[i] && args[i][0] != '\0')
             count++;
+    }
     
-    // Allocate new array
     new_args = malloc((count + 1) * sizeof(char *));
     if (!new_args)
         return (NULL);
     
-    // Copy non-NULL arguments
     j = 0;
     for (i = 0; args[i]; i++)
     {
-        if (args[i] != NULL)
+        if (args[i] && args[i][0] != '\0')
         {
             new_args[j] = strdup(args[i]);
             if (!new_args[j])
             {
-                // Free partially allocated array on failure
                 while (j > 0)
+                {
                     free(new_args[--j]);
+                }
                 free(new_args);
                 return (NULL);
             }
             j++;
         }
     }
-    new_args[j] = NULL; // Ensure NULL termination
-    
+    new_args[j] = NULL;
     return (new_args);
 }
 
