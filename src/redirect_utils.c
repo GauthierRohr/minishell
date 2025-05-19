@@ -118,10 +118,10 @@ char **handle_redirections(char **args, char ***env)
     // Execute command if there are valid arguments
     if (cleaned_args[0] && cleaned_args[0][0] != '\0')
     {
-        if (is_builtin(cleaned_args[0]))
+        if (contains_pipe(cleaned_args))
+            find_args(cleaned_args, *env);
+        else if (is_builtin(cleaned_args[0]))
             execute_builtin(cleaned_args, env);
-        else if (contains_pipe(cleaned_args))
-            find_args(cleaned_args);
         else
             execute_external(cleaned_args, *env);
     }
