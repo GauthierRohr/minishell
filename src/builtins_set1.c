@@ -2,38 +2,38 @@
 /*                                                                            */
 /*                                                        :::      ::::::::   */
 /*   builtins_set1.c                                    :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: grohr <grohr@student.42.fr>                +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/04/23 22:28:08 by grohr             #+#    #+#             */
-/*   Updated: 2025/05/19 18:41:11 by grohr            ###   ########.fr       */
+/*                                                    +:+         +:+     */
+/*   By: grohr <grohr@student.42.fr>                +#+  +:
+    #           */
+/*                                                +#           */
+/*   Created: 2025/04/23 22:28:08 by grohr             #::
+    #             */
+/*   Updated: 2025/05/27 22:00:00 by grohr            ###   #fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../inc/minishell.h"
-
 #include <string.h>
 
-// Pour prendre en compte les echo $PWD ou autres commandes
-char	*get_env_value(const char *name, char **env)
+char *get_env_value(const char *name, char **env)
 {
-	int		i;
-	size_t	len;
+    int i;
+    size_t len;
 
-	if (!name || !env)
-		return (NULL);
-	len = ft_strlen(name);
-	i = 0;
-	while (env[i])
-	{
-		if (ft_strncmp(env[i], name, len) == 0 && env[i][len] == '=')
-			return (env[i] + len + 1); // retourne juste la valeur
-		i++;
-	}
-	return (NULL);
+    if (!name || !env)
+        return (NULL);
+    len = ft_strlen(name);
+    i = 0;
+    while (env[i])
+    {
+        if (ft_strncmp(env[i], name, len) == 0 && env[i][len] == '=')
+            return (env[i] + len + 1);
+        i++;
+    }
+    return (NULL);
 }
 
-char *expand_vars(const char *token, char **env, t_state quote_state)
+char *expand_vars(const char *token, char **env)
 {
     char *expanded;
     char var_name[256];
@@ -48,11 +48,9 @@ char *expand_vars(const char *token, char **env, t_state quote_state)
 
     while (*ptr)
     {
-        // Ne pas expander dans les single quotes
-        if (*ptr == '$' && *(ptr + 1) && quote_state != STATE_IN_SINGLE_QUOTE)
+        if (*ptr == '$' && *(ptr + 1))
         {
             ptr++;
-            // pour "$?"
             if (*ptr == '?')
             {
                 exit_status_str = ft_itoa(g_last_exit_status);
@@ -67,7 +65,6 @@ char *expand_vars(const char *token, char **env, t_state quote_state)
                 ptr++;
                 continue;
             }
-            // Gestion normale des vars d'env
             else if (ft_isalpha(*ptr) || *ptr == '_')
             {
                 i = 0;
@@ -84,7 +81,8 @@ char *expand_vars(const char *token, char **env, t_state quote_state)
             else
             {
                 expanded[j++] = '$';
-                expanded[j++] = *ptr++;
+                if (*ptr)
+                    expanded[j++] = *ptr++;
             }
         }
         else
@@ -100,13 +98,7 @@ int builtin_echo(char **args, char ***env)
     int n_option = 0;
     char *clean_arg;
     char *tmp;
-    int print_space = 0;
-
-    /*
-    printf("DEBUG: Entering builtin_echo\n");
-    for (int j = 0; args[j]; j++)
-        printf("DEBUG: args[%d] = '%s'\n", j, args[j]);
-    */
+    int first_non_empty = 1;
 
     if (args[1] && ft_strcmp(args[1], "-n") == 0)
     {
@@ -117,50 +109,26 @@ int builtin_echo(char **args, char ***env)
     while (args[i])
     {
         clean_arg = NULL;
-        //printf("DEBUG: Processing arg[%d]: '%s'\n", i, args[i]);
-
-        // Vérifie si l'argument est entièrement entouré de guillemets simples
         if (args[i][0] == '\'' && args[i][ft_strlen(args[i]) - 1] == '\'')
         {
-            //printf("DEBUG: Single quotes detected\n");
             tmp = remove_quotes(args[i]);
-            //printf("DEBUG: After remove_quotes: '%s'\n", tmp);
-            clean_arg = ft_strdup(tmp);
+            clean_arg = tmp ? ft_strdup(tmp) : ft_strdup("");
             free(tmp);
         }
-        // Vérifie si l'argument est entièrement entouré de guillemets doubles
-        else if (args[i][0] == '"' && args[i][ft_strlen(args[i]) - 1] == '"')
-        {
-            //printf("DEBUG: Double quotes detected\n");
-            tmp = remove_quotes(args[i]);
-            //printf("DEBUG: After remove_quotes: '%s'\n", tmp);
-            clean_arg = expand_vars(tmp, *env, STATE_IN_DOUBLE_QUOTE);
-            free(tmp);
-        }
-        // Cas général : traite les guillemets partiels ou non entourés
         else
         {
-            //printf("DEBUG: Partial or no quotes, processing\n");
-            // Supprime tous les guillemets non entourants et expanse si nécessaire
             tmp = remove_partial_quotes(args[i]);
-            //printf("DEBUG: After remove_partial_quotes: '%s'\n", tmp);
-            clean_arg = expand_vars(tmp, *env, STATE_GENERAL);
+            clean_arg = tmp ? expand_vars(tmp, *env) : ft_strdup("");
             free(tmp);
         }
 
-        //printf("DEBUG: Final clean_arg: '%s'\n", clean_arg ? clean_arg : "NULL");
-
-        if (print_space && clean_arg && clean_arg[0] != '\0')
-            printf(" ");
         if (clean_arg && clean_arg[0] != '\0')
+        {
+            if (!first_non_empty)
+                printf(" ");
             printf("%s", clean_arg);
-
-        print_space = 1;
-        if (args[i + 1] && clean_arg && clean_arg[0] != '\0' &&
-            (args[i][0] == '\'' || args[i][0] == '"') &&
-            (args[i + 1][0] == '\'' || args[i + 1][0] == '"'))
-            print_space = 0;
-
+            first_non_empty = 0;
+        }
         free(clean_arg);
         i++;
     }
@@ -172,43 +140,22 @@ int builtin_echo(char **args, char ***env)
     return (0);
 }
 
-// Gère la commande cd : changer de répertoire
-//
-// return 0 en cas de succès, 1 en cas d'erreur
-//
-// getcwd(current_dir, sizeof(current_dir))
-// Appelle getcwd pour stocker le chemin actuel dans le buffer current_dir.
-// Le second argument est la taille max qu'on autorise à écrire dedans (ici 1024).
-//
-// chdir() tente de changer le répertoire de travail courant du processus
-// vers le chemin donné (target_dir). Il retourne :
-// 		-> 0 en cas de succès
-// 		-> -1 en cas d'erreur (ex : chemin invalide, permissions refusées)
-// Donc si chdir(...) != 0, cela signifie que le changement a échoué.
-//
 int builtin_cd(char **args, char ***env)
 {
     char *path;
     int ret;
 
     if (!args[1])
-        path = get_env_value("HOME", *env); // Aller à HOME si pas d'args
+        path = get_env_value("HOME", *env);
     else
     {
-        path = expand_vars(args[1], *env, STATE_GENERAL); // Expanser $PWD
+        path = expand_vars(args[1], *env);
         if (!path)
             path = ft_strdup(args[1]);
     }
     if (!path)
     {
         ft_putstr_fd("cd: memory error\n", 2);
-        g_last_exit_status = 1;
-        return (1);
-    }
-    if (args[2])
-    {
-        ft_putstr_fd("cd: too many arguments\n", 2);
-        free(path);
         g_last_exit_status = 1;
         return (1);
     }
@@ -225,11 +172,7 @@ int builtin_cd(char **args, char ***env)
     free(path);
     return (g_last_exit_status);
 }
- 
-// Gère la commande pwd pour afficher le répertoire courant
-// 
-// @return 0 en cas de succès, 1 en cas d'erreur
-// 
+
 int builtin_pwd(void)
 {
     char cwd[1024];
@@ -245,23 +188,16 @@ int builtin_pwd(void)
     return (1);
 }
 
-// Compte le nombre d'éléments dans un tableau de chaînes
-// 
-// @param array Tableau à compter
-// @return Nombre d'éléments
-//
-// also used in builtins_set2.c 
-int	count_array(char **array)
+int count_array(char **array)
 {
-	int	i;
+    int i;
 
-	i = 0;
-	while (array[i])
-		i++;
-	return (i);
+    i = 0;
+    while (array[i])
+        i++;
+    return (i);
 }
 
-// Fonction pour valider les noms de variables
 static int is_valid_identifier(const char *name)
 {
     int i = 0;
@@ -276,10 +212,6 @@ static int is_valid_identifier(const char *name)
     return (1);
 }
 
-// Gère la commande export pour définir des variables d'environnement
-//
-// return 0 en cas de succès, 1 en cas d'erreur
-//
 int builtin_export(char **args, char ***env)
 {
     int i;
@@ -305,7 +237,7 @@ int builtin_export(char **args, char ***env)
     while (args[i])
     {
         equal_sign = ft_strchr(args[i], '=');
-        if (equal_sign || !args[i][0]) // Gérer le cas où la chaîne est vide
+        if (equal_sign || !args[i][0])
         {
             var_name = equal_sign ? ft_substr(args[i], 0, equal_sign - args[i]) : ft_strdup(args[i]);
             if (!var_name || !is_valid_identifier(var_name))
@@ -319,9 +251,11 @@ int builtin_export(char **args, char ***env)
                 continue;
             }
             free(var_name);
-            *equal_sign = '\0';
+            if (equal_sign)
+                *equal_sign = '\0';
             env_index = find_env_var(*env, args[i]);
-            *equal_sign = '=';
+            if (equal_sign)
+                *equal_sign = '=';
 
             if (env_index != -1)
             {

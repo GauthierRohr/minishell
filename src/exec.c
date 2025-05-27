@@ -6,7 +6,7 @@
 /*   By: grohr <grohr@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/23 22:29:03 by grohr             #+#    #+#             */
-/*   Updated: 2025/05/13 18:30:09 by grohr            ###   ########.fr       */
+/*   Updated: 2025/05/27 16:34:26 by grohr            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,9 +98,9 @@ char *remove_partial_quotes(const char *str)
     return (result);
 }
 
-char *expand_vars(const char *token, char **env, t_state quote_state);
+//char *expand_vars(const char *token, char **env, t_state quote_state);
 
-// The execute_external function without using errno.
+// exec.c - fonction execute_external
 int execute_external(char **args, char **envp)
 {
     pid_t pid;
@@ -108,25 +108,23 @@ int execute_external(char **args, char **envp)
     struct stat st;
     int i;
 
-    // For each token:
-    // 1. Remove enclosing quotes.
-    // 2. Expand variables using STATE_GENERAL (i.e. no special quoting).
+    // Pour chaque argument, enlever les quotes et faire l’expansion
     for (i = 0; args[i]; i++)
     {
         char *tmp = remove_quotes(args[i]);
         free(args[i]);
         args[i] = tmp;
-        
-        tmp = expand_vars(args[i], envp, STATE_GENERAL);
+
+        tmp = expand_vars(args[i], envp);
         free(args[i]);
         args[i] = tmp;
     }
 
-    // Remove tokens that are now empty (e.g. for an unset $EMPTY).
+    // Supprimer les arguments vides (ex: après expansion d’une variable vide)
     args = clean_args(args);
     if (!args || !args[0] || args[0][0] == '\0')
     {
-        // Mimic bash: if no command remains, return success.
+        // Comme bash : pas de commande -> succès
         return 0;
     }
 
@@ -138,15 +136,13 @@ int execute_external(char **args, char **envp)
     }
     else if (pid == 0)
     {
-        /* In the child process */
-        // If the command appears to be a file path (contains a slash)
         if (strchr(args[0], '/'))
         {
             if (stat(args[0], &st) == 0)
             {
                 if (S_ISDIR(st.st_mode))
                 {
-                    fprintf(stderr, "%s: Is a directory\n", args[0]);
+                    fprintf(stderr, "%s: is a directory\n", args[0]);
                     exit(PERMISSION_DENIED);
                 }
                 if (access(args[0], X_OK) != 0)
@@ -156,22 +152,23 @@ int execute_external(char **args, char **envp)
                 }
             }
         }
-        // Attempt to execute the command.
-        execvp(args[0], args);
+        char *cmd_path = NULL;
         if (strchr(args[0], '/'))
-        {
-            fprintf(stderr, "%s: No such file or directory\n", args[0]);
-            exit(CMD_NOT_FOUND);
-        }
+            cmd_path = ft_strdup(args[0]);
         else
+            cmd_path = ft_get_cmd_path(args[0], envp);
+        if (!cmd_path)
         {
             fprintf(stderr, "%s: command not found\n", args[0]);
             exit(CMD_NOT_FOUND);
         }
+        execve(cmd_path, args, envp);
+        perror(args[0]);
+        free(cmd_path);
+        exit(CMD_NOT_FOUND);
     }
     else
     {
-        /* In the parent process, wait for the child to finish */
         waitpid(pid, &status, 0);
         g_last_exit_status = WEXITSTATUS(status);
         return WEXITSTATUS(status);

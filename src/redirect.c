@@ -6,12 +6,11 @@
 #include <string.h>
 #include <readline/readline.h>
 
-// Enlève les quotes autour d'un nom de fichier
 char *strip_quotes(char *str)
 {
     size_t len;
     char *new_str;
-    int i, j;
+    size_t i, j;
 
     if (!str)
         return (NULL);
@@ -19,25 +18,38 @@ char *strip_quotes(char *str)
     if (len == 0)
         return (strdup(""));
 
-    // Gérer les guillemets simples ou doubles entourant complètement
-    if ((str[0] == '"' && str[len - 1] == '"') || (str[0] == '\'' && str[len - 1] == '\''))
+    new_str = malloc(len + 1);
+    if (!new_str)
+        return (NULL);
+
+    i = 0;
+    j = 0;
+    while (i < len)
     {
-        new_str = malloc(len - 1); // len - 2 + 1 pour \0
-        if (!new_str)
-            return (NULL);
-        for (i = 1, j = 0; i < (int)len - 1; i++) // Cast int pour compatibilité
-            new_str[j++] = str[i];
-        new_str[j] = '\0';
-        return (new_str);
+        if (str[i] == '"' || str[i] == '\'')
+        {
+            i++;
+            continue;
+        }
+        new_str[j++] = str[i++];
     }
-    return (strdup(str));
+    new_str[j] = '\0';
+    return (new_str);
 }
 
 int handle_input_redirect(char *file)
 {
-    char *clean_file = strip_quotes(file);
+    char *clean_file;
     int fd;
 
+    if (!file)
+    {
+        fprintf(stderr, "minishell: input redirect: No such file or directory\n");
+        g_last_exit_status = 1;
+        return (-1);
+    }
+
+    clean_file = strip_quotes(file);
     if (!clean_file || !clean_file[0])
     {
         free(clean_file);
@@ -45,14 +57,17 @@ int handle_input_redirect(char *file)
         g_last_exit_status = 1;
         return (-1);
     }
+
     fd = open(clean_file, O_RDONLY);
-    free(clean_file);
     if (fd == -1)
     {
-        perror("minishell: input redirect");
+        fprintf(stderr, "minishell: %s: No such file or directory\n", clean_file);
+        free(clean_file);
         g_last_exit_status = 1;
         return (-1);
     }
+
+    free(clean_file);
     if (dup2(fd, STDIN_FILENO) == -1)
     {
         perror("minishell: dup2 input");
@@ -66,9 +81,17 @@ int handle_input_redirect(char *file)
 
 int handle_output_redirect(char *file)
 {
-    char *clean_file = strip_quotes(file);
+    char *clean_file;
     int fd;
 
+    if (!file)
+    {
+        fprintf(stderr, "minishell: output redirect: No such file or directory\n");
+        g_last_exit_status = 1;
+        return (-1);
+    }
+
+    clean_file = strip_quotes(file);
     if (!clean_file || !clean_file[0])
     {
         free(clean_file);
@@ -76,6 +99,7 @@ int handle_output_redirect(char *file)
         g_last_exit_status = 1;
         return (-1);
     }
+
     fd = open(clean_file, O_WRONLY | O_CREAT | O_TRUNC, 0644);
     free(clean_file);
     if (fd == -1)
@@ -97,9 +121,17 @@ int handle_output_redirect(char *file)
 
 int handle_append_redirect(char *file)
 {
-    char *clean_file = strip_quotes(file);
+    char *clean_file;
     int fd;
 
+    if (!file)
+    {
+        fprintf(stderr, "minishell: append redirect: No such file or directory\n");
+        g_last_exit_status = 1;
+        return (-1);
+    }
+
+    clean_file = strip_quotes(file);
     if (!clean_file || !clean_file[0])
     {
         free(clean_file);
@@ -107,6 +139,7 @@ int handle_append_redirect(char *file)
         g_last_exit_status = 1;
         return (-1);
     }
+
     fd = open(clean_file, O_WRONLY | O_CREAT | O_APPEND, 0644);
     free(clean_file);
     if (fd == -1)
@@ -131,12 +164,20 @@ int handle_heredoc(char *delimiter)
     int pipe_fd[2];
     char *line;
 
+    if (!delimiter)
+    {
+        fprintf(stderr, "minishell: heredoc: delimiter required\n");
+        g_last_exit_status = 1;
+        return (-1);
+    }
+
     if (pipe(pipe_fd) == -1)
     {
         perror("minishell: heredoc pipe");
         g_last_exit_status = 1;
         return (-1);
     }
+
     while (1)
     {
         line = readline("> ");
@@ -165,15 +206,23 @@ int process_redirections(char **args)
 {
     int i = 0;
     int j;
-    int redirect_failed = 0;
+
+    if (!args)
+        return (-1);
 
     while (args[i])
     {
-        if (strcmp(args[i], "<") == 0 && args[i + 1])
+        // Check for redirection operators and ensure the next argument exists
+        if (strcmp(args[i], "<") == 0)
         {
+            if (!args[i + 1])
+            {
+                fprintf(stderr, "minishell: syntax error near unexpected token `newline'\n");
+                g_last_exit_status = 2;
+                return (-1);
+            }
             if (handle_input_redirect(args[i + 1]) == -1)
-                redirect_failed = 1; // Mark failure but continue
-            // Déplacer les arguments pour supprimer "<" et le fichier
+                return (-1);
             free(args[i]);
             free(args[i + 1]);
             args[i] = NULL;
@@ -182,16 +231,22 @@ int process_redirections(char **args)
             while (args[j + 2])
             {
                 args[j] = args[j + 2];
+                args[j + 2] = NULL;
                 j++;
             }
             args[j] = NULL;
             continue;
         }
-        else if (strcmp(args[i], ">") == 0 && args[i + 1])
+        else if (strcmp(args[i], ">") == 0)
         {
+            if (!args[i + 1])
+            {
+                fprintf(stderr, "minishell: syntax error near unexpected token `newline'\n");
+                g_last_exit_status = 2;
+                return (-1);
+            }
             if (handle_output_redirect(args[i + 1]) == -1)
-                redirect_failed = 1;
-            // Déplacer les arguments pour supprimer ">" et le fichier
+                return (-1);
             free(args[i]);
             free(args[i + 1]);
             args[i] = NULL;
@@ -200,16 +255,22 @@ int process_redirections(char **args)
             while (args[j + 2])
             {
                 args[j] = args[j + 2];
+                args[j + 2] = NULL;
                 j++;
             }
             args[j] = NULL;
             continue;
         }
-        else if (strcmp(args[i], ">>") == 0 && args[i + 1])
+        else if (strcmp(args[i], ">>") == 0)
         {
+            if (!args[i + 1])
+            {
+                fprintf(stderr, "minishell: syntax error near unexpected token `newline'\n");
+                g_last_exit_status = 2;
+                return (-1);
+            }
             if (handle_append_redirect(args[i + 1]) == -1)
-                redirect_failed = 1;
-            // Déplacer les arguments pour supprimer ">>" et le fichier
+                return (-1);
             free(args[i]);
             free(args[i + 1]);
             args[i] = NULL;
@@ -218,16 +279,22 @@ int process_redirections(char **args)
             while (args[j + 2])
             {
                 args[j] = args[j + 2];
+                args[j + 2] = NULL;
                 j++;
             }
             args[j] = NULL;
             continue;
         }
-        else if (strcmp(args[i], "<<") == 0 && args[i + 1])
+        else if (strcmp(args[i], "<<") == 0)
         {
+            if (!args[i + 1])
+            {
+                fprintf(stderr, "minishell: syntax error near unexpected token `newline'\n");
+                g_last_exit_status = 2;
+                return (-1);
+            }
             if (handle_heredoc(args[i + 1]) == -1)
-                redirect_failed = 1;
-            // Déplacer les arguments pour supprimer "<<" et le délimiteur
+                return (-1);
             free(args[i]);
             free(args[i + 1]);
             args[i] = NULL;
@@ -236,6 +303,7 @@ int process_redirections(char **args)
             while (args[j + 2])
             {
                 args[j] = args[j + 2];
+                args[j + 2] = NULL;
                 j++;
             }
             args[j] = NULL;
@@ -243,5 +311,5 @@ int process_redirections(char **args)
         }
         i++;
     }
-    return (redirect_failed ? -1 : 0);
+    return (0);
 }

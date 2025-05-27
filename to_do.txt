@@ -30,7 +30,7 @@ not access your main data structures.
 Be careful. This global variable must only store the signal number and must not
 provide any additional information or access to data.
 Therefore, using "norm" type structures in the global scope is forbidden.
-• Implement the following redirections:
+• Implement the following redirections :
 ◦ < should redirect input.
 ◦ > should redirect output.
 ◦ << should be given a delimiter, then read the input until a line containing the
@@ -54,3 +54,4 @@ should expand to their values.
 • Handle $? which should expand to the exit status of the most recently executed
 foreground pipeline.
 -> $? affiche toujours le code de retour de la commande précédente.
+

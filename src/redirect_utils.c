@@ -11,10 +11,11 @@ char **clean_args(char **args)
     if (!args)
         return (NULL);
 
+    // Count non-NULL arguments
     i = 0;
     while (args[i])
     {
-        if (args[i] && args[i][0] != '\0')
+        if (args[i] && args[i][0] != '\0') // Skip NULL or empty strings
             count++;
         i++;
     }
@@ -65,13 +66,17 @@ void restore_stdio(int stdin_backup, int stdout_backup)
 {
     if (stdin_backup != -1)
     {
-        dup2(stdin_backup, STDIN_FILENO);
+        if (dup2(stdin_backup, STDIN_FILENO) == -1)
+            perror("minishell: restore STDIN failed");
         close(stdin_backup);
+        //printf("DEBUG: STDIN restauré (fd=%d)\n", stdin_backup);
     }
     if (stdout_backup != -1)
     {
-        dup2(stdout_backup, STDOUT_FILENO);
+        if (dup2(stdout_backup, STDOUT_FILENO) == -1)
+            perror("minishell: restore STDOUT failed");
         close(stdout_backup);
+       // printf("DEBUG: STDOUT restauré (fd=%d)\n", stdout_backup);
     }
 }
 
