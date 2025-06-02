@@ -24,6 +24,7 @@
 # include "tokenizer.h"
 # include "piping.h"
 # include "limits.h"
+# include "free.h"
 
 #define RED     "\033[1;31m"
 #define GREEN   "\033[1;32m"
