@@ -1,16 +1,17 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   builtins_set2.c                                    :+:      :+:    :+:   */
+/*   free_utils.c                                        :+:    :+:           */
 /*                                                    +:+ +:+         +:+     */
 /*   By: grohr <grohr@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#           */
 /*   Created: 2025/04/23 22:28:19 by grohr             #+#    #+#             */
-/*   Updated: 2025/05/20 18:05:00 by grohr            ###   ########.fr       */
+/*   Updated: 2025/06/03 18:04:25 by cjauregu       ########   odam.nl        */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../inc/free.h"
+#include "../inc/minishell.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -44,4 +45,11 @@ void	free_tab(char **tab)
 		i++;
 	}
 	free(tab);
+}
+
+void	cleanup_pipeline(pid_t *pids)
+{
+	perror("minishell: pipeline error");
+	free(pids);
+	g_last_exit_status = 1;
 }

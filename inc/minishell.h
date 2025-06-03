@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   minishell.h                                        :+:      :+:    :+:   */
+/*   minishell.h                                         :+:    :+:           */
 /*                                                    +:+ +:+         +:+     */
 /*   By: grohr <grohr@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/23 22:28:10 by grohr             #+#    #+#             */
-/*   Updated: 2025/05/27 14:49:57 by grohr            ###   ########.fr       */
+/*   Updated: 2025/06/03 14:36:08 by cjauregu       ########   odam.nl        */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 
 # include "../libft/libft.h"
 # include "builtins.h"
+# include "builtins_extra.h"
 # include "env.h"
 # include "exec.h"
 # include "get_cmd_path.h"
@@ -26,13 +27,13 @@
 # include "limits.h"
 # include "free.h"
 
-#define RED     "\033[1;31m"
-#define GREEN   "\033[1;32m"
-#define YELLOW  "\033[1;33m"
-#define BLUE    "\033[1;34m"
-#define MAGENTA "\033[1;35m"
-#define CYAN    "\033[1;36m"
-#define RST   	"\033[0m"
+# define RED     "\033[1;31m"
+# define GREEN   "\033[1;32m"
+# define YELLOW  "\033[1;33m"
+# define BLUE    "\033[1;34m"
+# define MAGENTA "\033[1;35m"
+# define CYAN    "\033[1;36m"
+# define RST   	"\033[0m"
 
 # include <stdio.h>
 # include <stdlib.h>
@@ -51,6 +52,6 @@
 # include <readline/history.h>
 # include <curses.h>
 
-extern int g_last_exit_status;
+extern int	g_last_exit_status;
 
 #endif // MINISHELL_H
