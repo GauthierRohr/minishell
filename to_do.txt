@@ -55,3 +55,17 @@ should expand to their values.
 foreground pipeline.
 -> $? affiche toujours le code de retour de la commande précédente.
 
+/*
+void	print_tab(char **tab)
+{
+	int	i;
+	
+	i = 0;
+	while (tab && tab[i])
+	{
+		printf("%stoken[%s%d%s] :%s %s->%s  %s  %s<-%s\n", CYAN, RST, i, CYAN, RST, RED, RST, tab[i], RED, RST);
+		i++;
+	}
+	printf("\n");
+}
+*/

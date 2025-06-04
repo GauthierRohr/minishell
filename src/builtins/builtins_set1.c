@@ -147,6 +147,11 @@ int builtin_cd(char **args, char ***env)
 
     if (!args[1])
         path = get_env_value("HOME", *env);
+    else if (args[2])
+    {
+        ft_putstr_fd("cd: too many arguments\n", 2);
+        return (1);
+    }
     else
     {
         path = expand_vars(args[1], *env);

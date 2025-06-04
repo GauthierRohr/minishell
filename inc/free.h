@@ -1,23 +1,37 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   exec.h                                              :+:    :+:           */
+/*   free.h                                              :+:    :+:           */
 /*                                                    +:+ +:+         +:+     */
 /*   By: grohr <grohr@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/23 22:28:10 by grohr             #+#    #+#             */
-/*   Updated: 2025/06/03 14:34:26 by cjauregu       ########   odam.nl        */
+/*   Updated: 2025/05/27 14:49:57 by grohr            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef EXEC_H
-# define EXEC_H
+#ifndef FREE_H
+# define FREE_H
 
-# define CMD_NOT_FOUND        127
-# define PERMISSION_DENIED    126
+# include <stdio.h>
+# include <stdlib.h>
+# include <string.h>
+# include <unistd.h>
+# include <fcntl.h>
+# include <signal.h>
+# include <dirent.h>
+# include <termios.h>
+# include <sys/types.h>
+# include <sys/stat.h>
+# include <sys/wait.h>
+# include <sys/ioctl.h>
+# include <signal.h>
+# include <readline/readline.h>
+# include <readline/history.h>
+# include <curses.h>
 
-char	*remove_quotes(const char *str);
-char	*remove_partial_quotes(const char *str);
-int		execute_external(char **args, char **envp);
+void	free_env(char **env);
+void	free_tab(char **tab);
+void    cleanup_pipeline(pid_t *pids);
 
 #endif

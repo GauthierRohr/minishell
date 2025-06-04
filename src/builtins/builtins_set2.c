@@ -225,7 +225,7 @@ int builtin_exit(char **args, char ***env)
         ft_putstr_fd(args[1], 2);
         ft_putstr_fd(": numeric argument required\n", 2);
         free(arg);
-        exit(255); // Changed from 2 to 255 to match bash
+        exit(2); // Changed from 2 to 255 to match bash
     }
 
     free(arg);
