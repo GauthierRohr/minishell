@@ -10,8 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../inc/minishell.h"
-#include "../inc/tokenizer.h"
+#include "../../inc/minishell.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>

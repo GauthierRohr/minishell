@@ -1,19 +1,16 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   env.c                                              :+:      :+:    :+:   */
+/*   get_cmd_path.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: grohr <grohr@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/13 17:28:08 by grohr             #+#    #+#             */
-/*   Updated: 2025/05/27 15:07:45 by grohr            ###   ########.fr       */
+/*   Updated: 2025/06/05 20:09:10 by grohr            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "get_cmd_path.h"
-#include <stdlib.h>
-#include <unistd.h>
-#include <string.h>
+#include "../inc/minishell.h"
 
 static char	*ft_strjoin3(const char *s1, const char *s2, const char *s3)
 {

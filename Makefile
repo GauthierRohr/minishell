@@ -9,22 +9,37 @@ OBJ_DIR = obj
 LIBFT = ./libft/libft.a
 
 # Sources
-SRCS =  src/builtins/builtins_main.c \
-        src/builtins/builtins_set1.c \
-        src/builtins/builtins_set2.c \
-        src/env.c \
+SRCS =	src/builtins/export/export_utils.c \
+		src/builtins/export/export_vars.c \
+		src/builtins/export/export.c \
+		src/builtins/builtins_main.c \
+        src/builtins/cd.c \
+		src/builtins/echo.c \
+        src/builtins/env.c \
+		src/builtins/exit.c \
+		src/builtins/pwd.c \
+		src/builtins/unset.c \
 		src/exec/exec_utils.c \
         src/exec/exec.c \
-        src/get_cmd_path.c \
-        src/main.c \
+        src/piping/piping.c \
         src/redirect/redirect_utils.c \
         src/redirect/redirect.c \
-        src/signals.c \
         src/tokenizer/tokenizer.c \
         src/tokenizer/tokenizer_utils.c \
         src/tokenizer/tokenizer_handle.c \
-        src/piping/piping.c \
-        src/free_utils.c
+		src/utils/ft_strtol.c \
+		src/utils/get_env_value.c \
+		src/utils/remove_partial_quotes.c \
+        src/env.c \
+        src/free_utils.c \
+        src/get_cmd_path.c \
+        src/main.c \
+        src/signals.c
+
+#		src/piping/piping.c
+#		src/piping/split_pipeline.c
+#		src/piping/exec_pipeline.c
+#		src/piping/child_pipeline.c
 
 OBJS = $(SRCS:src/%.c=$(OBJ_DIR)/%.o)
 

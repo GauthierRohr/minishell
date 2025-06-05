@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   signals.c                                           :+:    :+:           */
+/*   signals.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: grohr <grohr@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/13 17:29:50 by grohr             #+#    #+#             */
-/*   Updated: 2025/06/02 15:58:04 by cjauregu       ########   odam.nl        */
+/*   Updated: 2025/06/05 20:10:06 by grohr            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,7 @@
 #include <unistd.h>
 #include <readline/readline.h>
 #include <readline/history.h>
+#include "../inc/minishell.h"
 
 /* SIGINT handler: Called when Ctrl+C is pressed */
 void	sigint_handler(int signum)

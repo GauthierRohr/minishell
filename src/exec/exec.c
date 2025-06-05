@@ -6,7 +6,7 @@
 /*   By: grohr <grohr@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/23 22:29:03 by grohr             #+#    #+#             */
-/*   Updated: 2025/05/27 16:34:26 by grohr            ###   ########.fr       */
+/*   Updated: 2025/06/05 19:58:56 by grohr            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,41 +15,13 @@
 // Fork + execve : pour lancer des binaires.
 // Gérer les erreurs de path, permissions, etc.
 
-#include "../inc/minishell.h"
+#include "../../inc/minishell.h"
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-/* Removes partial quotes from the string without using for loops */
-char *remove_partial_quotes(const char *str)
-{
-    char *result;
-    int i;
-    int j;
-    t_state state;
-    
-    if (str == NULL)
-        return NULL;
-    result = malloc(strlen(str) + 1);
-    if (result == NULL)
-        return NULL;
-    i = 0;
-    j = 0;
-    state = STATE_GENERAL;
-    while (str[i] != '\0')
-    {
-        if (handle_quote_state(str, &i, &state) == 1)
-            continue;
-        result[j] = str[i];
-        j = j + 1;
-        i = i + 1;
-    }
-    result[j] = '\0';
-    return result;
-}
 
 /* Processes each argument by removing quotes and expanding variables */
 static void process_arguments(char ***pargs, char **envp)

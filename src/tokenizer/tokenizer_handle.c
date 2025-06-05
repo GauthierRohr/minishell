@@ -1,17 +1,16 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   tokenizer_handle.c                                  :+:    :+:           */
+/*   tokenizer_handle.c                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: grohr <grohr@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/13 17:29:58 by grohr             #+#    #+#             */
-/*   Updated: 2025/05/13 18:22:36 by grohr            ###   ########.fr       */
+/*   Updated: 2025/06/05 20:06:29 by grohr            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../inc/minishell.h"
-#include "../inc/tokenizer.h"
+#include "../../inc/minishell.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>

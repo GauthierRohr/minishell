@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   minishell.h                                         :+:    :+:           */
+/*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: grohr <grohr@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/23 22:28:10 by grohr             #+#    #+#             */
-/*   Updated: 2025/06/03 14:36:08 by cjauregu       ########   odam.nl        */
+/*   Updated: 2025/06/05 20:04:40 by grohr            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,14 +18,14 @@
 # include "builtins_extra.h"
 # include "env.h"
 # include "exec.h"
+# include "free.h"
 # include "get_cmd_path.h"
 # include "main.h"
+# include "piping.h"
 # include "redirect.h"
 # include "signals.h"
 # include "tokenizer.h"
-# include "piping.h"
-# include "limits.h"
-# include "free.h"
+# include "utils.h"
 
 # define RED     "\033[1;31m"
 # define GREEN   "\033[1;32m"
@@ -35,6 +35,7 @@
 # define CYAN    "\033[1;36m"
 # define RST   	"\033[0m"
 
+# include "limits.h"
 # include <stdio.h>
 # include <stdlib.h>
 # include <string.h>
