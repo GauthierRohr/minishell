@@ -13,22 +13,22 @@
 #ifndef EXEC_H
 # define EXEC_H
 
-# define CMD_NOT_FOUND        127
-# define PERMISSION_DENIED    126
+# define CMD_NOT_FOUND 127
+# define PERMISSION_DENIED 126
 
 typedef struct s_quote_bounds
 {
-    int orig_len;
-    int start;
-    int i;
-    int end;
-} t_quote_bounds;
+	int	orig_len;
+	int	start;
+	int	i;
+	int	end;
+}		t_quote_bounds;
 
 typedef struct s_copy_indexes
 {
-    int src;
-    int dest;
-} t_copy_indexes;
+	int	src;
+	int	dest;
+}		t_copy_indexes;
 
 char	*remove_quotes(const char *str);
 char	*remove_partial_quotes(const char *str);
