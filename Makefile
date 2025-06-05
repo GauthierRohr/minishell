@@ -23,8 +23,6 @@ SRCS =  src/builtins/builtins_main.c \
         src/tokenizer/tokenizer_utils.c \
         src/tokenizer/tokenizer_handle.c \
         src/piping/piping.c \
-        src/piping/piping_utils.c \
-        src/piping/find_args.c \
         src/free_utils.c
 
 OBJS = $(SRCS:src/%.c=$(OBJ_DIR)/%.o)

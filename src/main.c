@@ -15,22 +15,6 @@
 
 int	g_last_exit_status = 0;
 
-int	contains_pipe(char **args)
-{
-	int	i;
-
-	i = 0;
-	if (!args)
-		return (0);
-	while (args[i] != NULL)
-	{
-		if (strcmp(args[i], "|") == 0)
-			return (1);
-		i++;
-	}
-	return (0);
-}
-
 void	choose_execution(char **cleaned_args, char ***env)
 {
 	if (contains_pipe(cleaned_args))

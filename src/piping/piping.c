@@ -19,80 +19,210 @@
 #include <stdlib.h>
 #include <string.h>
 
-void execute_child(char **command, char **envp, int in_fd, int pipefd[2])
+int contains_pipe(char **args)
 {
-    setup_child_io(in_fd, pipefd);
-    int redirect_status = process_redirections(command);
-    char **args = clean_args(command);
-    if (args == NULL || args[0] == NULL)
+    int i;
+
+    i = 0;
+    if (!args)
+        return (0);
+    while (args[i] != NULL)
     {
-        free_tab(args);
-        exit((redirect_status == -1) ? 1 : 0);
+        if (strcmp(args[i], "|") == 0)
+            return (1);
+        i++;
     }
-    if (is_builtin(args[0]))
-    {
-        int ret = execute_builtin(args, &envp);
-        free_tab(args);
-        exit(ret);
-    }
-    execute_external(args, envp);
+    return (0);
 }
 
-void run_pipeline_loop(char ***commands, int num_cmds, char **envp, pid_t *pids)
+void find_args(char **args, char **envp)
 {
-    int i = 0, in_fd = STDIN_FILENO, pipefd[2];
-    while (i < num_cmds)
+    int num_cmds = 1, i = 0, cmd_index = 0;
+    while (args[i] != NULL)
     {
-        if (i < num_cmds - 1)
-            if (pipe(pipefd) == -1) {
-                cleanup_pipeline(pids);
-                return;
-            }
-        pid_t pid = fork();
-        if (pid < 0)    { 
-            cleanup_pipeline(pids);
+        if (strcmp(args[i], "|") == 0)
+            num_cmds++;
+        i++;
+    }
+    
+    char ***commands = malloc((num_cmds + 1) * sizeof(char **));
+    if (!commands)
+    {
+        perror("minishell: malloc");
+        g_last_exit_status = 1;
+        return;
+    }
+    
+    i = 0;
+    while (args[i] != NULL)
+    {
+        int token_count = 0, j = i;
+        while (args[j] != NULL && strcmp(args[j], "|") != 0)
+        {
+            token_count++;
+            j++;
+        }
+        
+        char **cmd = malloc((token_count + 1) * sizeof(char *));
+        if (!cmd)
+        {
+            perror("minishell: malloc");
+            g_last_exit_status = 1;
+            free(commands);
             return;
         }
-        if (pid == 0)
-            if (i < num_cmds - 1)
-                execute_child(commands[i], envp, in_fd, pipefd);
-            else
-                execute_child(commands[i], envp, in_fd, NULL);
-        pids[i] = pid;
-        if (i < num_cmds - 1)
+        
+        int token_index = 0;
+        while (args[i] != NULL && strcmp(args[i], "|") != 0)
         {
-            close(pipefd[1]);
-            if (in_fd != STDIN_FILENO)
-                close(in_fd);
-            in_fd = pipefd[0];
+            cmd[token_index] = ft_strdup(args[i]);
+            token_index++;
+            i++;
         }
-        i = i + 1;
+        cmd[token_index] = NULL;
+        commands[cmd_index++] = cmd;
+        
+        if (args[i] != NULL && strcmp(args[i], "|") == 0)
+            i++;
     }
+    commands[cmd_index] = NULL;
+    
+    execute_pipeline(commands, num_cmds, envp);
+    
+    for (i = 0; i < num_cmds; i++)
+        free_tab(commands[i]);
+    free(commands);
 }
 
 void execute_pipeline(char ***commands, int num_cmds, char **envp)
 {
+    int i;
+    int in_fd = STDIN_FILENO;
+    int pipefd[2];
     pid_t *pids = malloc(num_cmds * sizeof(pid_t));
-    int stdin_b = dup(STDIN_FILENO), stdout_b = dup(STDOUT_FILENO);
     int status;
-    if (pids == NULL)
-    {
-        perror("minishell: pipeline setup");
-        g_last_exit_status = 1;
-        return;
-    }
-    if (stdin_b == -1 || stdout_b == -1)
+    int stdin_backup = dup(STDIN_FILENO);
+    int stdout_backup = dup(STDOUT_FILENO);
+
+    if (!pids || stdin_backup == -1 || stdout_backup == -1)
     {
         perror("minishell: pipeline setup");
         free(pids);
+        if (stdin_backup != -1)
+            close(stdin_backup);
+        if (stdout_backup != -1)
+            close(stdout_backup);
         g_last_exit_status = 1;
         return;
     }
-    run_pipeline_loop(commands, num_cmds, envp, pids);
-    if (STDIN_FILENO != stdin_b)
-        close(STDIN_FILENO);
-    restore_stdio(stdin_b, stdout_b);
-    wait_children(pids, num_cmds, &status);
+
+    for (i = 0; i < num_cmds; i++)
+    {
+        if (i < num_cmds - 1)
+        {
+            if (pipe(pipefd) == -1)
+            {
+                perror("minishell: pipe");
+                free(pids);
+                close(stdin_backup);
+                close(stdout_backup);
+                g_last_exit_status = 1;
+                return;
+            }
+        }
+
+        pids[i] = fork();
+        if (pids[i] < 0)
+        {
+            perror("minishell: fork");
+            free(pids);
+            close(stdin_backup);
+            close(stdout_backup);
+            g_last_exit_status = 1;
+            return;
+        }
+        else if (pids[i] == 0)
+        {
+            // Set up input
+            if (in_fd != STDIN_FILENO)
+            {
+                dup2(in_fd, STDIN_FILENO);
+                close(in_fd);
+            }
+            // Set up output for pipes
+            if (i < num_cmds - 1)
+            {
+                close(pipefd[0]);
+                dup2(pipefd[1], STDOUT_FILENO);
+                close(pipefd[1]);
+            }
+
+            // Handle redirections
+            int redirect_status = process_redirections(commands[i]);
+            char **cleaned_args = clean_args(commands[i]);
+
+            if (!cleaned_args || !cleaned_args[0])
+            {
+                free_tab(cleaned_args);
+                exit(redirect_status == -1 ? 1 : 0);
+            }
+
+            // Execute command
+            if (is_builtin(cleaned_args[0]))
+            {
+                int ret = execute_builtin(cleaned_args, &envp);
+                free_tab(cleaned_args);
+                exit(ret);
+            }
+            else
+            {
+                char *cmd_path = NULL;
+                if (strchr(cleaned_args[0], '/'))
+                    cmd_path = ft_strdup(cleaned_args[0]);
+                else
+                    cmd_path = ft_get_cmd_path(cleaned_args[0], envp);
+                if (!cmd_path)
+                {
+                    fprintf(stderr, "%s: command not found\n", cleaned_args[0]);
+                    free_tab(cleaned_args);
+                    exit(127);
+                }
+                execve(cmd_path, cleaned_args, envp);
+                perror(cleaned_args[0]);
+                free(cmd_path);
+                free_tab(cleaned_args);
+                exit(127);
+            }
+        }
+        else
+        {
+            if (i < num_cmds - 1)
+            {
+                close(pipefd[1]);
+                if (in_fd != STDIN_FILENO)
+                    close(in_fd);
+                in_fd = pipefd[0];
+            }
+        }
+    }
+
+    // Close remaining pipe fds in parent
+    if (in_fd != STDIN_FILENO)
+        close(in_fd);
+
+    // Restore parent's stdio
+    dup2(stdin_backup, STDIN_FILENO);
+    dup2(stdout_backup, STDOUT_FILENO);
+    close(stdin_backup);
+    close(stdout_backup);
+
+    // Wait for all child processes
+    for (i = 0; i < num_cmds; i++)
+    {
+        waitpid(pids[i], &status, 0);
+        if (WIFEXITED(status) && i == num_cmds - 1)
+            g_last_exit_status = WEXITSTATUS(status);
+    }
+
     free(pids);
-    return;
 }

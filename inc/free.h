@@ -32,6 +32,5 @@
 
 void	free_env(char **env);
 void	free_tab(char **tab);
-void    cleanup_pipeline(pid_t *pids);
 
 #endif
