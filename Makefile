@@ -13,7 +13,8 @@ SRCS =  src/builtins/builtins_main.c \
         src/builtins/builtins_set1.c \
         src/builtins/builtins_set2.c \
         src/env.c \
-        src/exec.c \
+		src/exec/exec_utils.c \
+        src/exec/exec.c \
         src/get_cmd_path.c \
         src/main.c \
         src/redirect/redirect_utils.c \

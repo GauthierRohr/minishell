@@ -53,3 +53,14 @@ void	cleanup_pipeline(pid_t *pids)
 	free(pids);
 	g_last_exit_status = 1;
 }
+
+char *get_command_path(char **args, char **envp)
+{
+    char *result;
+    
+    if (strchr(args[0], '/') != NULL)
+        result = ft_strdup(args[0]);
+    else
+        result = ft_get_cmd_path(args[0], envp);
+    return result;
+}

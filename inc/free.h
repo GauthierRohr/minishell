@@ -32,5 +32,6 @@
 
 void	free_env(char **env);
 void	free_tab(char **tab);
+char    *get_command_path(char **args, char **envp);
 
 #endif

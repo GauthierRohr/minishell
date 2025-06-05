@@ -65,3 +65,8 @@ int	handle_regular(t_tok *t)
 	t->current[t->curr_i++] = t->input[t->pos++];
 	return (1);
 }
+
+int	is_special_char(char c)
+{
+	return (c == '|' || c == '<' || c == '>');
+}

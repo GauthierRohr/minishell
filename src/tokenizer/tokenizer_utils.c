@@ -15,12 +15,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-// Vérifie si un caractère est un opérateur spécial (|, <, >)
-int	is_special_char(char c)
-{
-	return (c == '|' || c == '<' || c == '>');
-}
-
 // Alloue et retourne une sous-chaîne de `input` entre `start` et `end`
 char	*extract_token(const char *input, int start, int end)
 {
@@ -91,4 +85,31 @@ int	flush_token(t_tok *t)
 	}
 	t->curr_i = 0;
 	return (1);
+}
+
+int  handle_quote_state(const char *src, int *pi, t_state *pstate)
+{
+    if (*pstate == STATE_GENERAL)
+    {
+        if (src[*pi] == '\'' || src[*pi] == '"')
+        {
+            if (src[*pi] == '\'')
+                *pstate = STATE_IN_SINGLE_QUOTE;
+            else
+                *pstate = STATE_IN_DOUBLE_QUOTE;
+            *pi = *pi + 1;
+            return 1;
+        }
+    }
+    else
+    {
+        if (((*pstate) == STATE_IN_SINGLE_QUOTE && src[*pi] == '\'') ||
+            ((*pstate) == STATE_IN_DOUBLE_QUOTE && src[*pi] == '"'))
+        {
+            *pstate = STATE_GENERAL;
+            *pi = *pi + 1;
+            return 1;
+        }
+    }
+    return 0;
 }

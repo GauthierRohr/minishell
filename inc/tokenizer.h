@@ -48,6 +48,7 @@ char	*extract_token(const char *input, int start, int end);
 int		add_token(char ***tokens, int *size, char *value);
 int		flush_token(t_tok *t);
 void	update_state_quote(t_state *state, char c);
+int			handle_quote_state(const char *src, int *pi, t_state *pstate);
 
 //tokenizer_handle.c
 int		handle_char_quote(t_tok *t);
