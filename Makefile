@@ -9,31 +9,29 @@ OBJ_DIR = obj
 LIBFT = ./libft/libft.a
 
 # Sources
-SRCS =	src/builtins_main.c \
-		src/builtins_set1.c \
-		src/builtins_set2.c \
-		src/env.c \
-		src/exec.c \
-		src/get_cmd_path.c \
-		src/main.c \
-		src/redirect_utils.c \
-		src/redirect.c \
-		src/signals.c \
-		src/tokenizer.c \
-		src/tokenizer_utils.c \
-		src/piping.c \
-		src/free_utils.c
+SRCS =  src/builtins/builtins_main.c \
+        src/builtins/builtins_set1.c \
+        src/builtins/builtins_set2.c \
+        src/env.c \
+        src/exec.c \
+        src/get_cmd_path.c \
+        src/main.c \
+        src/redirect_utils.c \
+        src/redirect.c \
+        src/signals.c \
+        src/tokenizer.c \
+        src/tokenizer_utils.c \
+        src/tokenizer_handle.c \
+        src/piping.c \
+        src/free_utils.c
 
 OBJS = $(SRCS:src/%.c=$(OBJ_DIR)/%.o)
 
-
-
-# Règles principales
 all: $(NAME)
 
-# Compilation des objets
+# Compilation of object files
 $(OBJ_DIR)/%.o: src/%.c
-	@mkdir -p $(OBJ_DIR)
+	@mkdir -p $(dir $@)
 	@$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
 
 $(LIBFT):
@@ -42,7 +40,6 @@ $(LIBFT):
 $(NAME): $(OBJS) $(LIBFT)
 	$(CC) $(CFLAGS) $(OBJS) $(LIBFT) -lreadline -o $(NAME)
 
-# Nettoyage
 clean:
 	rm -rf $(OBJ_DIR)
 	$(MAKE) -C ./libft clean

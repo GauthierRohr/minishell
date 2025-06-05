@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   tokenizer.c                                        :+:      :+:    :+:   */
-/*                                                    +:+         +:+     */
+/*   tokenizer.c                                         :+:    :+:           */
+/*                                                    +:+         +:+         */
 /*   By: grohr <grohr@student.42.fr>                +#+  +:+       +#+        */
-/*                                                +#           */
-/*   Created: 2025/05/13 17:30:08 by grohr             #+#    #    #             */
-/*   Updated: 2025/05/27 16:21:08 by grohr            ###   #    #             */
+/*                                                +#           		      */
+/*   Created: 2025/05/13 17:30:08 by grohr             #+#    #    #          */
+/*   Updated: 2025/06/03 13:49:01 by cjauregu       ########   odam.nl        */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,130 +16,60 @@
 #include <string.h>
 #include <stdio.h>
 
-static void update_state_quote(t_state *state, char c)
+static char	**fail_tokenizer(t_tok *t)
 {
-    if (*state == STATE_GENERAL)
-    {
-        if (c == '\'')
-            *state = STATE_IN_SINGLE_QUOTE;
-        else if (c == '\"')
-            *state = STATE_IN_DOUBLE_QUOTE;
-    }
-    else if (*state == STATE_IN_SINGLE_QUOTE && c == '\'')
-        *state = STATE_GENERAL;
-    else if (*state == STATE_IN_DOUBLE_QUOTE && c == '\"')
-        *state = STATE_GENERAL;
+	free(t->current);
+	free_tab(t->tokens);
+	return (NULL);
 }
 
-char **tokenize_input(const char *input, int size, int i)
+static int	process_tokenizer_loop(t_tok *t)
 {
-    char **tokens = NULL;
-    t_state state = STATE_GENERAL;
-    int input_len = strlen(input);
-    int curr_i = 0;
-    char *current = malloc(input_len + 1);
+	while (t->input[t->pos])
+	{
+		update_state_quote(&t->state, t->input[t->pos]);
+		if (t->state != STATE_GENERAL)
+		{
+			if (!handle_char_quote(t))
+				return (0);
+		}
+		else if (t->input[t->pos] == ' ')
+		{
+			if (!handle_space(t))
+				return (0);
+		}
+		else if (is_special_char(t->input[t->pos]))
+		{
+			if (!handle_special(t))
+				return (0);
+		}
+		else
+		{
+			if (!handle_regular(t))
+				return (0);
+		}
+	}
+	return (1);
+}
 
-    if (!current)
-        return (NULL);
+char	**tokenize_input(const char *input, int size, int i)
+{
+	t_tok	t;
 
-    while (input[i])
-    {
-        update_state_quote(&state, input[i]);
-
-        // Handle quoted strings
-        if (state == STATE_IN_SINGLE_QUOTE || state == STATE_IN_DOUBLE_QUOTE)
-        {
-            current[curr_i++] = input[i++];
-            if (state == STATE_GENERAL) // Quote closed
-            {
-                current[curr_i] = '\0';
-                if (!add_token(&tokens, &size, strdup(current)))
-                {
-                    free(current);
-                    free_tab(tokens);
-                    return (NULL);
-                }
-                curr_i = 0;
-            }
-            continue;
-        }
-
-        // Handle spaces in general state
-        if (state == STATE_GENERAL && input[i] == ' ')
-        {
-            if (curr_i > 0)
-            {
-                current[curr_i] = '\0';
-                if (!add_token(&tokens, &size, strdup(current)))
-                {
-                    free(current);
-                    free_tab(tokens);
-                    return (NULL);
-                }
-                curr_i = 0;
-            }
-            i++;
-            continue;
-        }
-
-        // Handle special characters (<, >, |, <<, >>)
-        if (state == STATE_GENERAL && is_special_char(input[i]))
-        {
-            if (curr_i > 0)
-            {
-                current[curr_i] = '\0';
-                if (!add_token(&tokens, &size, strdup(current)))
-                {
-                    free(current);
-                    free_tab(tokens);
-                    return (NULL);
-                }
-                curr_i = 0;
-            }
-            if ((input[i] == '<' && input[i + 1] == '<') || (input[i] == '>' && input[i + 1] == '>'))
-            {
-                current[0] = input[i];
-                current[1] = input[i + 1];
-                current[2] = '\0';
-                if (!add_token(&tokens, &size, strdup(current)))
-                {
-                    free(current);
-                    free_tab(tokens);
-                    return (NULL);
-                }
-                i += 2;
-            }
-            else if (input[i] == '<' || input[i] == '>' || input[i] == '|')
-            {
-                current[0] = input[i];
-                current[1] = '\0';
-                if (!add_token(&tokens, &size, strdup(current)))
-                {
-                    free(current);
-                    free_tab(tokens);
-                    return (NULL);
-                }
-                i++;
-            }
-            continue;
-        }
-
-        // Handle regular characters
-        current[curr_i++] = input[i++];
-    }
-
-    // Add the last token if any
-    if (curr_i > 0)
-    {
-        current[curr_i] = '\0';
-        if (!add_token(&tokens, &size, strdup(current)))
-        {
-            free(current);
-            free_tab(tokens);
-            return (NULL);
-        }
-    }
-
-    free(current);
-    return (tokens);
+	t.input = input;
+	t.pos = i;
+	t.size = size;
+	t.state = STATE_GENERAL;
+	t.curr_i = 0;
+	t.tokens = NULL;
+	t.current = malloc(strlen(input) + 1);
+	if (!t.current)
+		return (NULL);
+	if (!process_tokenizer_loop(&t))
+		return (fail_tokenizer(&t));
+	if (t.curr_i > 0)
+		if (!flush_token(&t))
+			return (fail_tokenizer(&t));
+	free(t.current);
+	return (t.tokens);
 }

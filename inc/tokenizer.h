@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   tokenizer.h                                         :+:    :+:           */
+/*                                                    +:+ +:+         +:+     */
+/*   By: grohr <grohr@student.42.fr>                +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/04/23 22:28:10 by grohr             #+#    #+#             */
+/*   Updated: 2025/06/03 14:44:22 by cjauregu       ########   odam.nl        */
+/*                                                                            */
+/* ************************************************************************** */
+
 #ifndef TOKENIZER_H
 # define TOKENIZER_H
 
@@ -17,14 +29,30 @@ typedef struct s_token
 	t_state	quote_state;
 }	t_token;
 
+typedef struct s_tok {
+	const char	*input;
+	int			pos;
+	char		**tokens;
+	int			size;
+	t_state		state;
+	int			curr_i;
+	char		*current;
+}	t_tok;
+
 // tokenizer.c
-int 	extract_quoted_token(const char *input, int *i, char quote, char ***tokens, int *size);
-char 	**tokenize_input(const char *input, int size, int i);
-// char 	**expand_all_tokens(char **tokens, char **env);
+char	**tokenize_input(const char *input, int size, int i);
 
 // tokenizer_utils.c
 int		is_special_char(char c);
 char	*extract_token(const char *input, int start, int end);
-int 	add_token(char ***tokens, int *size, char *value);
+int		add_token(char ***tokens, int *size, char *value);
+int		flush_token(t_tok *t);
+void	update_state_quote(t_state *state, char c);
+
+//tokenizer_handle.c
+int		handle_char_quote(t_tok *t);
+int		handle_space(t_tok *t);
+int		handle_special(t_tok *t);
+int		handle_regular(t_tok *t);
 
 #endif
